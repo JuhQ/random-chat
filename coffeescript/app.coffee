@@ -21,6 +21,7 @@ app.configure "development", ->
   app.use express.errorHandler()
 
 app.get "/", routes.index
+app.get "/mad/test", routes.test
 
 
 cluster = require("cluster")

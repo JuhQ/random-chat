@@ -33,6 +33,8 @@
 
   app.get("/", routes.index);
 
+  app.get("/mad/test", routes.test);
+
   cluster = require("cluster");
 
   numCPUs = require("os").cpus().length;

@@ -108,7 +108,7 @@ define [
 
     linkify: (str) ->
       re = [
-            "#([a-z0-9]+)"
+            "#([a-z0-9_-]+)"
             "&gt;&gt;([0-9]+)"
           ]
       re = new RegExp(re.join("|"), "gi")

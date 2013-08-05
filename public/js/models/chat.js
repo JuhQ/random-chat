@@ -113,7 +113,7 @@
       },
       linkify: function(str) {
         var re;
-        re = ["#([a-z0-9]+)", "&gt;&gt;([0-9]+)"];
+        re = ["#([a-z0-9_-]+)", "&gt;&gt;([0-9]+)"];
         re = new RegExp(re.join("|"), "gi");
         return str.replace(re, function(match, twitler, ylilauta) {
           if (twitler) {
