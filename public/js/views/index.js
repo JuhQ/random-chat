@@ -33,17 +33,34 @@
         return this.$(".messages").html("");
       },
       sendMessage: function(event) {
-        var input, message, room;
+        var clearForm, command, input, message, room;
         event.preventDefault();
         input = $(event.target).find("input[name='message']");
         message = input.val();
         if (!message) {
           return;
         }
-        input.val("");
-        input.focus();
+        clearForm = function() {
+          input.val("");
+          return input.focus();
+        };
+        command = message.match(/\/(nick|join|j) ([#-_a-z0-9]+)/);
+        if (command) {
+          this.commands(command);
+          clearForm();
+          return;
+        }
+        clearForm();
         room = $(".room").val();
         return this.model.send(this.username, message, room);
+      },
+      commands: function(command) {
+        var _ref;
+        if ((_ref = command[1]) === "join" || _ref === "j") {
+          Backbone.history.navigate("#" + command[2].replace("#", ""));
+        } else if (command[1] === "nick") {
+          this.username = command[2];
+        }
       },
       setBoards: function(room) {
         var board, rooms;

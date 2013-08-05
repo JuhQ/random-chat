@@ -66,10 +66,14 @@ define [
     showMessage: (data) ->
       that = @
       me = @username is data.u
-      m = _.escape data.m
-      m = that.linkify m
+      message = _.escape data.m
+      message = message.replace("&#x27;", "'")
+      message = that.linkify message
+
       color = data.u.toString(16).substring(0,6)
-      @messages.append _.template Template, {m, me, color}
+      username = data.u
+      m = message
+      @messages.append _.template Template, {m, me, color, username}
 
       last = $(".message:last").offset().top
       @window.scrollTop last

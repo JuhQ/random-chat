@@ -45,10 +45,31 @@ define [
       input = $(event.target).find("input[name='message']")
       message = input.val()
       return unless message
-      input.val("")
-      input.focus()
+
+      clearForm = ->
+        input.val("")
+        input.focus()
+
+      command = message.match(/\/(nick|join|j) ([#-_a-z0-9]+)/)
+
+      if command
+        @commands command
+        clearForm()
+        return
+
+      clearForm()
       room = $(".room").val()
       @model.send @username, message, room
+
+    commands: (command) ->
+      if command[1] in ["join", "j"]
+        Backbone.history.navigate("#" + command[2].replace("#",""))
+
+      else if command[1] is "nick"
+        @username = command[2]
+
+      return
+
 
     # TODO: make separate view for boards
     setBoards: (room) ->

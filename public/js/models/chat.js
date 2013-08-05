@@ -57,16 +57,20 @@
         });
       },
       showMessage: function(data) {
-        var color, last, m, me, that;
+        var color, last, m, me, message, that, username;
         that = this;
         me = this.username === data.u;
-        m = _.escape(data.m);
-        m = that.linkify(m);
+        message = _.escape(data.m);
+        message = message.replace("&#x27;", "'");
+        message = that.linkify(message);
         color = data.u.toString(16).substring(0, 6);
+        username = data.u;
+        m = message;
         this.messages.append(_.template(Template, {
           m: m,
           me: me,
-          color: color
+          color: color,
+          username: username
         }));
         last = $(".message:last").offset().top;
         return this.window.scrollTop(last);
