@@ -65,7 +65,7 @@ define [
         Backbone.history.navigate("#" + command[2].replace("#",""))
 
       else if command[1] is "nick"
-        @username = command[2]
+        @username = command[2].substring(0,25)
 
       return
 

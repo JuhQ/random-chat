@@ -58,7 +58,7 @@
         if ((_ref = command[1]) === "join" || _ref === "j") {
           Backbone.history.navigate("#" + command[2].replace("#", ""));
         } else if (command[1] === "nick") {
-          this.username = command[2];
+          this.username = command[2].substring(0, 25);
         }
       },
       setBoards: function(room) {
