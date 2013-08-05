@@ -15,7 +15,6 @@
       },
       setOptions: function(options) {
         var room;
-        console.log("setOptions", options);
         room = options.room || this.mainRoom;
         if (!this.model) {
           this.model = new Model();
@@ -56,6 +55,7 @@
           $(".room-name").text(room);
         }
         rooms = $(".rooms");
+        rooms.html("");
         return this.boards.each(function(model) {
           return rooms.append('<a href="#' + model.get("boardurl") + '">' + model.get("boardname") + '</a> ');
         });

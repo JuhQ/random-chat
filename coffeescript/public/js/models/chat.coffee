@@ -44,7 +44,6 @@ define [
       m = m.trim()
       return unless m.length
       return if @lastMessage is m
-      console.log "sending", m
       @lastMessage = m
       @socket.emit "message",
         {u, m, r}
@@ -61,7 +60,6 @@ define [
       messages = $(".messages")
       chat = $(window)
       @socket.on "message", (data) ->
-        console.log "receive", data
         me = that.username is data.u
         m = _.escape data.m
         m = that.linkify m
@@ -84,14 +82,11 @@ define [
     listenJoin: ->
       that = @
       @socket.on "join", (room) ->
-        console.log '$(".room").val()"', $(".room").val()
-
         $(".room").val(room)
-        console.log "join", room
 
     listenLeave: ->
       @socket.on "leave", (room) ->
-        console.log "leave", room
+
 
     joinRoom: (r) ->
       @socket.emit "join",

@@ -37,7 +37,6 @@
         if (this.lastMessage === m) {
           return;
         }
-        console.log("sending", m);
         this.lastMessage = m;
         this.socket.emit("message", {
           u: u,
@@ -56,7 +55,6 @@
         chat = $(window);
         return this.socket.on("message", function(data) {
           var color, last, m, me;
-          console.log("receive", data);
           me = that.username === data.u;
           m = _.escape(data.m);
           m = that.linkify(m);
@@ -87,15 +85,11 @@
         var that;
         that = this;
         return this.socket.on("join", function(room) {
-          console.log('$(".room").val()"', $(".room").val());
-          $(".room").val(room);
-          return console.log("join", room);
+          return $(".room").val(room);
         });
       },
       listenLeave: function() {
-        return this.socket.on("leave", function(room) {
-          return console.log("leave", room);
-        });
+        return this.socket.on("leave", function(room) {});
       },
       joinRoom: function(r) {
         return this.socket.emit("join", {

@@ -27,8 +27,6 @@ define [
       return
 
     setOptions: (options) ->
-      console.log "setOptions", options
-
       room = options.room || @mainRoom
       @model = new Model() unless @model
       @model.setOptions {room}
@@ -62,6 +60,7 @@ define [
 
 
       rooms = $(".rooms")
+      rooms.html("")
       @boards.each (model) ->
         rooms.append('<a href="#' + model.get("boardurl") + '">' + model.get("boardname") + '</a> ')
 
