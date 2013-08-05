@@ -81,6 +81,9 @@ define [
       @messages.append _.template Template, {m, me, color, username}
 
       last = $(".message:last").offset().top
+      
+      $(".message:first").remove() if $(".message").length > 30
+
       @window.scrollTop last
 
     listenChat: ->

@@ -77,6 +77,9 @@
           username: username
         }));
         last = $(".message:last").offset().top;
+        if ($(".message").length > 30) {
+          $(".message:first").remove();
+        }
         return this.window.scrollTop(last);
       },
       listenChat: function() {
