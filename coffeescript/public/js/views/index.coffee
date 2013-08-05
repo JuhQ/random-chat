@@ -50,7 +50,7 @@ define [
         input.val("")
         input.focus()
 
-      command = message.match(/\/(nick|join|j) ([#-_a-z0-9]+)/)
+      command = message.match(/\/(nick|join|j) ([#-_A-Za-z0-9]+)/i)
 
       if command
         @commands command

@@ -63,6 +63,7 @@
         message = _.escape(data.m);
         message = message.replace("&#x27;", "'");
         message = that.linkify(message);
+        message = message.replace("[tonninseteli]", '<img src="http://cdn.userpics.com/upload/tonninseteli.jpg"' + ' style="width:30px;height:30px;">');
         color = data.u.toString(16).substring(0, 6);
         username = data.u;
         m = message;
