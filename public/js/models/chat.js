@@ -57,13 +57,16 @@
         });
       },
       showMessage: function(data) {
-        var color, last, m, me, message, that, username;
+        var color, img, last, m, me, message, style, that, username;
         that = this;
         me = this.username === data.u;
         message = _.escape(data.m);
         message = message.replace("&#x27;", "'");
         message = that.linkify(message);
-        message = message.replace("[tonninseteli]", '<img src="http://cdn.userpics.com/upload/tonninseteli.jpg"' + ' style="width:30px;height:30px;">');
+        img = '<img src="';
+        style = ' style="width:30px;height:30px;">';
+        message = message.replace(/(\[tonninseteli\])/gi, img + 'http://cdn.userpics.com/upload/tonninseteli.jpg"' + style);
+        message = message.replace(/(\[hitler\])/gi, img + 'http://static.ylilauta.org/files/wb/orig/1366214983604638.gif"' + style);
         color = data.u.toString(16).substring(0, 6);
         username = data.u;
         m = message;
