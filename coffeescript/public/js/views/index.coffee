@@ -27,7 +27,6 @@ define [
 
       $("input[name='message']").bind "paste", (e) ->
         e.preventDefault()
-        alert("homo älä pastee")
       return
 
     setOptions: (options) ->
