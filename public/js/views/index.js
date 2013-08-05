@@ -12,6 +12,9 @@
       initialize: function() {
         this.username = String(this.random(0, (new Date()).getTime())).substring(0, 10);
         this.username = Number(this.username);
+        $("input[name='message']").bind("paste", function(e) {
+          return e.preventDefault();
+        });
       },
       setOptions: function(options) {
         var room;

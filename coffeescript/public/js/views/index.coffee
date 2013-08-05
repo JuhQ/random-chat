@@ -24,6 +24,10 @@ define [
     initialize: ->
       @username = String(@random(0, (new Date()).getTime())).substring(0,10)
       @username = Number @username
+
+      $("input[name='message']").bind "paste", (e) ->
+        e.preventDefault()
+
       return
 
     setOptions: (options) ->
