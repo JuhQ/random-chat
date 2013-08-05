@@ -70,10 +70,12 @@ define [
       message = message.replace("&#x27;", "'")
       message = that.linkify message
 
-      img = '<img src="'
-      style = ' style="width:30px;height:30px;">'
-      message = message.replace(/(\[tonninseteli\])/gi, img + 'http://cdn.userpics.com/upload/tonninseteli.jpg"' + style)
-      message = message.replace(/(\[hitler\])/gi, img + 'http://static.ylilauta.org/files/wb/orig/1366214983604638.gif"' + style)
+      img = '<img src="http://'
+      style = '" style="width:30px;height:30px;" class="img-circle">'
+      message = message.replace(/(\[tonninseteli\])/gi, img + 'cdn.userpics.com/upload/tonninseteli.jpg' + style)
+      message = message.replace(/(\[hitler\])/gi, img + 'static.ylilauta.org/files/wb/orig/1366214983604638.gif' + style)
+      message = message.replace(/(\[ylilauta\])/gi, img + 'meemi.info/images/2/2a/Norppa_ylilauta_175px.png' + style)
+      message = message.replace(/(\[es\])/gi, img + 'static.ylilauta.org/files/ux/orig/1365450810932532.jpg' + style)
 
       color = data.u.toString(16).substring(0,6)
       username = data.u
