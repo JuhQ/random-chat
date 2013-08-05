@@ -1,0 +1,22 @@
+.panel {
+  padding: 5px;
+  margin-bottom: 2px;
+  border-top: none;
+  border-bottom: none;
+  border-left: none;
+  border-right: none;
+}
+.panel:last-child {
+  margin-bottom: 20px;
+}
+.square {
+  -webkit-border-radius: 0 !important;
+  -moz-border-radius: 0 !important;
+  border-radius: 0 !important;
+}
+.rooms {
+  max-height: 20px;
+  max-width: 60%;
+  text-align: right;
+  overflow: scroll;
+}
