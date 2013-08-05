@@ -15,4 +15,3 @@ define [
 
       @view = new Index() unless @view
       @view.setOptions {room}
-

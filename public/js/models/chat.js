@@ -2,6 +2,8 @@
   define(["underscore", "backbone", "socketio", "text!templates/message.html"], function(_, Backbone, io, Template) {
     return Backbone.Model.extend({
       initialize: function(options) {
+        this.messages = $(".messages");
+        this.window = $(window);
         this.messageSent = null;
         this.lastMessage = null;
         this.socket = io.connect("http://" + window.location.host);
@@ -24,48 +26,56 @@
       send: function(u, message, r) {
         var m, that;
         that = this;
-        if (this.messageSent) {
-          return;
-        }
-        _gaq.push(['_trackPageview']);
         this.username = u;
         m = message.substring(0, 1000);
         m = m.trim();
+        if (this.messageSent) {
+          return this.showSpam(m);
+        }
+        _gaq.push(['_trackPageview']);
         if (!m.length) {
           return;
         }
         if (this.lastMessage === m) {
-          return;
+          return this.showSpam(m);
         }
-        this.lastMessage = m;
         this.socket.emit("message", {
           u: u,
           m: m,
           r: r
         });
         this.messageSent = true;
+        this.lastMessage = m;
         this.timeout = setTimeout(function() {
           that.messageSent = false;
         }, 3000);
       },
-      listenChat: function() {
-        var chat, messages, that;
+      showSpam: function(m) {
+        return this.showMessage({
+          u: this.username,
+          m: m
+        });
+      },
+      showMessage: function(data) {
+        var color, last, m, me, that;
         that = this;
-        messages = $(".messages");
-        chat = $(window);
+        me = this.username === data.u;
+        m = _.escape(data.m);
+        m = that.linkify(m);
+        color = data.u.toString(16).substring(0, 6);
+        this.messages.append(_.template(Template, {
+          m: m,
+          me: me,
+          color: color
+        }));
+        last = $(".message:last").offset().top;
+        return this.window.scrollTop(last);
+      },
+      listenChat: function() {
+        var that;
+        that = this;
         return this.socket.on("message", function(data) {
-          var color, last, m, me;
-          me = that.username === data.u;
-          m = _.escape(data.m);
-          m = that.linkify(m);
-          color = data.u.toString(16).substring(0, 6);
-          messages.append(_.template(Template, {
-            m: m,
-            me: me,
-            color: color
-          }));
-          last = $(".message:last").offset().top;
-          return chat.scrollTop(last);
+          return that.showMessage(data);
         });
       },
       listenCount: function() {
@@ -103,20 +113,14 @@
       },
       linkify: function(str) {
         var re;
-        re = ["\\b((?:https?|ftp)://[^\\s\"'<>]+)\\b", "\\b(www\\.[^\\s\"'<>]+)\\b", "\\b(\\w[\\w.+-]*@[\\w.-]+\\.[a-z]{2,6})\\b", "#([a-z0-9]+)"];
+        re = ["#([a-z0-9]+)", "&gt;&gt;([0-9]+)"];
         re = new RegExp(re.join("|"), "gi");
-        return str.replace(re, function(match, url, www, mail, twitler) {
-          if (url) {
-            return "<a href=\"" + url + "\">" + url + "</a>";
-          }
-          if (www) {
-            return "<a href=\"http://" + www + "\">" + www + "</a>";
-          }
-          if (mail) {
-            return "<a href=\"mailto:" + mail + "\">" + mail + "</a>";
-          }
+        return str.replace(re, function(match, twitler, ylilauta) {
           if (twitler) {
             return "<a href=\"/#" + twitler + "\">#" + twitler + "</a>";
+          }
+          if (ylilauta) {
+            return "<a href=\"http://ylilauta.org/scripts/redirect.php?id=" + ylilauta + "\">&gt;&gt;" + ylilauta + "</a>";
           }
           return match;
         });

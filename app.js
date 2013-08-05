@@ -61,12 +61,9 @@
   room = 123;
 
   io.sockets.on("connection", function(socket) {
-    room = 'room-#{room}';
     socket.on("join", function(data) {
       socket.join(data.r);
-      socket.emit("join", data.r);
-      room = 'room-' + data.r;
-      return console.log("join", data.r);
+      return socket.emit("join", data.r);
     });
     socket.on("leave", function(data) {
       socket.leave(data.r);
@@ -75,7 +72,7 @@
     socket.on("count", function(data) {
       var clients;
       clients = io.sockets.clients(data.r).length;
-      return socket.emit('clients', Math.ceil(clients / numCPUs));
+      return socket.emit('clients', Math.ceil(clients));
     });
     return socket.on("message", function(data) {
       var _ref;

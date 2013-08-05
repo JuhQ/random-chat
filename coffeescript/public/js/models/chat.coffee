@@ -11,11 +11,14 @@ define [
   ) ->
   Backbone.Model.extend
     initialize: (options) ->
+
+      @messages = $(".messages")
+      @window = $(window)
+
       @messageSent = null
       @lastMessage = null
       @socket = io.connect("http://" + window.location.host)
       @listenChat()
-
       @listenCount()
       @listenJoin()
       @listenLeave()
@@ -33,21 +36,23 @@ define [
       , 2000
       return
 
-
     send: (u, message, r) ->
       that = @
-      return if @messageSent
-    
-      _gaq.push(['_trackPageview'])
+
       @username = u
       m = message.substring(0,1000)
       m = m.trim()
+
+      return @showSpam(m) if @messageSent
+    
+      _gaq.push(['_trackPageview'])
       return unless m.length
-      return if @lastMessage is m
-      @lastMessage = m
-      @socket.emit "message",
-        {u, m, r}
+      return @showSpam(m) if @lastMessage is m
+
+      @socket.emit "message", {u, m, r}
+
       @messageSent = true
+      @lastMessage = m
 
       @timeout = setTimeout ->
         that.messageSent = false
@@ -55,19 +60,24 @@ define [
       , 3000
       return
 
+    showSpam: (m) ->
+      @showMessage u: @username, m: m
+
+    showMessage: (data) ->
+      that = @
+      me = @username is data.u
+      m = _.escape data.m
+      m = that.linkify m
+      color = data.u.toString(16).substring(0,6)
+      @messages.append _.template Template, {m, me, color}
+
+      last = $(".message:last").offset().top
+      @window.scrollTop last
+
     listenChat: ->
       that = @
-      messages = $(".messages")
-      chat = $(window)
       @socket.on "message", (data) ->
-        me = that.username is data.u
-        m = _.escape data.m
-        m = that.linkify m
-        color = data.u.toString(16).substring(0,6)
-        messages.append _.template Template, {m, me, color}
-
-        last = $(".message:last").offset().top
-        chat.scrollTop last
+        that.showMessage(data)
 
     listenCount: ->
       that = @
@@ -97,21 +107,13 @@ define [
         {r}
 
     linkify: (str) ->
-      
-      # order matters
       re = [
-            "\\b((?:https?|ftp)://[^\\s\"'<>]+)\\b"
-            "\\b(www\\.[^\\s\"'<>]+)\\b"
-            "\\b(\\w[\\w.+-]*@[\\w.-]+\\.[a-z]{2,6})\\b"
             "#([a-z0-9]+)"
+            "&gt;&gt;([0-9]+)"
           ]
       re = new RegExp(re.join("|"), "gi")
-      str.replace re, (match, url, www, mail, twitler) ->
-        return "<a href=\"" + url + "\">" + url + "</a>"  if url
-        return "<a href=\"http://" + www + "\">" + www + "</a>"  if www
-        return "<a href=\"mailto:" + mail + "\">" + mail + "</a>"  if mail
-        return "<a href=\"/#" + twitler + "\">#" + twitler + "</a>"  if twitler
-        
-        # shouldnt get here, but just in case
-        match
+      str.replace re, (match, twitler, ylilauta) ->
+        return "<a href=\"/#" + twitler + "\">#" + twitler + "</a>" if twitler
+        return "<a href=\"http://ylilauta.org/scripts/redirect.php?id=" + ylilauta + "\">&gt;&gt;" + ylilauta + "</a>" if ylilauta
 
+        match
