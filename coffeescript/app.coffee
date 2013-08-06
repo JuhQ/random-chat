@@ -42,22 +42,24 @@ io.set "store", new RedisStore(
   redisSub: sub
   redisClient: redisClient
 )
-room = 123
-io.sockets.on "connection", (socket) ->
-  #room = 'room-#{room}'
-  #socket.join room
 
+clients = 0
+io.sockets.on "connection", (socket) ->
+  clients++
   socket.on "join", (data) ->
     socket.join data.r
     socket.emit "join", data.r
+
+  socket.on "disconnect", () ->
+    clients--
 
   socket.on "leave", (data) ->
     socket.leave data.r
     socket.emit "leave", data.r
 
   socket.on "count", (data) ->
-    clients = io.sockets.clients(data.r).length
-    socket.emit('clients', Math.ceil(clients))
+    #clients = io.sockets.clients(data.r).length
+    socket.emit('clients', clients)
 
   socket.on "message", (data) ->
     return unless data.m?.length

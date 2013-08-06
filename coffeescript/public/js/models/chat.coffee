@@ -17,12 +17,17 @@ define [
 
       @messageSent = null
       @lastMessage = null
-      @socket = io.connect("http://" + window.location.host)
+      @connect()
+
       @listenChat()
       @listenCount()
       @listenJoin()
       @listenLeave()
+      @listenDisconnect()
 
+    connect: ->
+      @socket = io.connect("http://" + window.location.host)
+      return
 
     setOptions: (options) ->
       that = @
@@ -39,6 +44,7 @@ define [
     send: (u, message, r) ->
       that = @
 
+      u = String(u).substring(0,25)
       @username = u
       m = message.substring(0,1000)
       m = m.trim()
@@ -66,7 +72,7 @@ define [
     showMessage: (data) ->
       that = @
       me = @username is data.u
-      message = _.escape data.m
+      message = _.escape data.m.substring(0,1000)
       message = message.replace("&#x27;", "'")
       message = that.linkify message
 
@@ -77,7 +83,7 @@ define [
       message = message.replace(/(\[ylilauta\])/gi, img + 'meemi.info/images/2/2a/Norppa_ylilauta_175px.png' + style)
       message = message.replace(/(\[es\])/gi, img + 'static.ylilauta.org/files/ux/orig/1365450810932532.jpg' + style)
 
-      username = _.escape data.u
+      username = _.escape String(data.u).substring(0,25)
 
       username = username.replace(/(\[tonninseteli\])/gi, img + 'cdn.userpics.com/upload/tonninseteli.jpg' + style)
       username = username.replace(/(\[hitler\])/gi, img + 'static.ylilauta.org/files/wb/orig/1366214983604638.gif' + style)
@@ -94,6 +100,11 @@ define [
       $(".message:first").remove() if $(".message").length > 30
 
       @window.scrollTop last
+
+    listenDisconnect: ->
+      that = @
+      @socket.on "disconnec", (data) ->
+        that.connect()
 
     listenChat: ->
       that = @

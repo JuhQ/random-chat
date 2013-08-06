@@ -6,11 +6,15 @@
         this.window = $(window);
         this.messageSent = null;
         this.lastMessage = null;
-        this.socket = io.connect("http://" + window.location.host);
+        this.connect();
         this.listenChat();
         this.listenCount();
         this.listenJoin();
-        return this.listenLeave();
+        this.listenLeave();
+        return this.listenDisconnect();
+      },
+      connect: function() {
+        this.socket = io.connect("http://" + window.location.host);
       },
       setOptions: function(options) {
         var that;
@@ -26,6 +30,7 @@
       send: function(u, message, r) {
         var m, that;
         that = this;
+        u = String(u).substring(0, 25);
         this.username = u;
         m = message.substring(0, 1000);
         m = m.trim();
@@ -60,7 +65,7 @@
         var color, img, last, m, me, message, style, that, username;
         that = this;
         me = this.username === data.u;
-        message = _.escape(data.m);
+        message = _.escape(data.m.substring(0, 1000));
         message = message.replace("&#x27;", "'");
         message = that.linkify(message);
         img = '<img src="http://';
@@ -69,7 +74,7 @@
         message = message.replace(/(\[hitler\])/gi, img + 'static.ylilauta.org/files/wb/orig/1366214983604638.gif' + style);
         message = message.replace(/(\[ylilauta\])/gi, img + 'meemi.info/images/2/2a/Norppa_ylilauta_175px.png' + style);
         message = message.replace(/(\[es\])/gi, img + 'static.ylilauta.org/files/ux/orig/1365450810932532.jpg' + style);
-        username = _.escape(data.u);
+        username = _.escape(String(data.u).substring(0, 25));
         username = username.replace(/(\[tonninseteli\])/gi, img + 'cdn.userpics.com/upload/tonninseteli.jpg' + style);
         username = username.replace(/(\[hitler\])/gi, img + 'static.ylilauta.org/files/wb/orig/1366214983604638.gif' + style);
         username = username.replace(/(\[ylilauta\])/gi, img + 'meemi.info/images/2/2a/Norppa_ylilauta_175px.png' + style);
@@ -87,6 +92,13 @@
           $(".message:first").remove();
         }
         return this.window.scrollTop(last);
+      },
+      listenDisconnect: function() {
+        var that;
+        that = this;
+        return this.socket.on("disconnec", function(data) {
+          return that.connect();
+        });
       },
       listenChat: function() {
         var that;

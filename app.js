@@ -1,5 +1,5 @@
 (function() {
-  var RedisStore, app, cluster, express, http, i, io, numCPUs, path, pub, redis, redisClient, room, routes, server, sub;
+  var RedisStore, app, clients, cluster, express, http, i, io, numCPUs, path, pub, redis, redisClient, routes, server, sub;
 
   express = require("express");
 
@@ -60,21 +60,23 @@
     redisClient: redisClient
   }));
 
-  room = 123;
+  clients = 0;
 
   io.sockets.on("connection", function(socket) {
+    clients++;
     socket.on("join", function(data) {
       socket.join(data.r);
       return socket.emit("join", data.r);
+    });
+    socket.on("disconnect", function() {
+      return clients--;
     });
     socket.on("leave", function(data) {
       socket.leave(data.r);
       return socket.emit("leave", data.r);
     });
     socket.on("count", function(data) {
-      var clients;
-      clients = io.sockets.clients(data.r).length;
-      return socket.emit('clients', Math.ceil(clients));
+      return socket.emit('clients', clients);
     });
     return socket.on("message", function(data) {
       var _ref;
