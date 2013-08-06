@@ -103,7 +103,7 @@ define [
 
     listenDisconnect: ->
       that = @
-      @socket.on "disconnec", (data) ->
+      @socket.on "disconnect", (data) ->
         that.connect()
 
     listenChat: ->

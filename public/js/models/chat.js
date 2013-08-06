@@ -96,7 +96,7 @@
       listenDisconnect: function() {
         var that;
         that = this;
-        return this.socket.on("disconnec", function(data) {
+        return this.socket.on("disconnect", function(data) {
           return that.connect();
         });
       },
