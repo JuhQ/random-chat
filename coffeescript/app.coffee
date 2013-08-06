@@ -44,7 +44,9 @@ io.set "store", new RedisStore(
 )
 
 clients = 0
+clientsObject = {}
 io.sockets.on "connection", (socket) ->
+  clientsObject[socket.id] = socket
   clients++
   socket.on "join", (data) ->
     socket.join data.r
@@ -52,6 +54,7 @@ io.sockets.on "connection", (socket) ->
 
   socket.on "disconnect", () ->
     clients--
+    delete clientsObject[socket.id]
 
   socket.on "leave", (data) ->
     socket.leave data.r

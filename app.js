@@ -1,5 +1,5 @@
 (function() {
-  var RedisStore, app, clients, cluster, express, http, i, io, numCPUs, path, pub, redis, redisClient, routes, server, sub;
+  var RedisStore, app, clients, clientsObject, cluster, express, http, i, io, numCPUs, path, pub, redis, redisClient, routes, server, sub;
 
   express = require("express");
 
@@ -62,14 +62,18 @@
 
   clients = 0;
 
+  clientsObject = {};
+
   io.sockets.on("connection", function(socket) {
+    clientsObject[socket.id] = socket;
     clients++;
     socket.on("join", function(data) {
       socket.join(data.r);
       return socket.emit("join", data.r);
     });
     socket.on("disconnect", function() {
-      return clients--;
+      clients--;
+      return delete clientsObject[socket.id];
     });
     socket.on("leave", function(data) {
       socket.leave(data.r);
