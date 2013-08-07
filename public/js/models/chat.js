@@ -21,11 +21,6 @@
         that = this;
         this.joinRoom(options.room);
         this.oldroom = options.room;
-        this.clientCount(options.room);
-        clearInterval(this.clientInterval);
-        this.clientInterval = setInterval(function() {
-          return that.clientCount(options.room);
-        }, 2000);
       },
       send: function(u, message, r) {
         var m, that;
@@ -51,7 +46,7 @@
         });
         this.messageSent = true;
         this.lastMessage = m;
-        this.timeout = setTimeout(function() {
+        setTimeout(function() {
           that.messageSent = false;
         }, 3000);
       },
@@ -61,13 +56,17 @@
           m: m
         });
       },
+      parseMessage: function(message) {
+        message = _.escape(message.substring(0, 1000));
+        message = message.replace(/&#x27;/gi, "'");
+        message = this.linkify(message);
+        return message;
+      },
       showMessage: function(data) {
-        var color, img, last, m, me, message, style, that, username;
+        var color, img, me, message, style, that, username;
         that = this;
         me = this.username === data.u;
-        message = _.escape(data.m.substring(0, 1000));
-        message = message.replace("&#x27;", "'");
-        message = that.linkify(message);
+        message = this.parseMessage(data.m);
         img = '<img src="http://';
         style = '" style="width:30px;height:30px;" class="img-circle">';
         message = message.replace(/(\[tonninseteli\])/gi, img + 'cdn.userpics.com/upload/tonninseteli.jpg' + style);
@@ -80,18 +79,16 @@
         username = username.replace(/(\[ylilauta\])/gi, img + 'meemi.info/images/2/2a/Norppa_ylilauta_175px.png' + style);
         username = username.replace(/(\[es\])/gi, img + 'static.ylilauta.org/files/ux/orig/1365450810932532.jpg' + style);
         color = data.u.toString(16).substring(0, 6);
-        m = message;
         this.messages.append(_.template(Template, {
-          m: m,
+          m: message,
           me: me,
           color: color,
           username: username
         }));
-        last = $(".message:last").offset().top;
         if ($(".message").length > 30) {
           $(".message:first").remove();
         }
-        return this.window.scrollTop(last);
+        return this.window.scrollTop($(".message:last").offset().top);
       },
       listenDisconnect: function() {
         var that;
@@ -113,11 +110,6 @@
         count = $(".count");
         return this.socket.on("clients", function(clients) {
           return count.text(clients);
-        });
-      },
-      clientCount: function(r) {
-        return this.socket.emit("count", {
-          r: r
         });
       },
       listenJoin: function() {

@@ -11,7 +11,6 @@ define [
   ) ->
   Backbone.Model.extend
     initialize: (options) ->
-
       @messages = $(".messages")
       @window = $(window)
 
@@ -33,12 +32,7 @@ define [
       that = @
       @joinRoom options.room
       @oldroom = options.room
-      @clientCount(options.room)
 
-      clearInterval @clientInterval
-      @clientInterval = setInterval ->
-        that.clientCount(options.room)
-      , 2000
       return
 
     send: (u, message, r) ->
@@ -60,7 +54,7 @@ define [
       @messageSent = true
       @lastMessage = m
 
-      @timeout = setTimeout ->
+      setTimeout ->
         that.messageSent = false
         return
       , 3000
@@ -69,15 +63,23 @@ define [
     showSpam: (m) ->
       @showMessage u: @username, m: m
 
+    parseMessage: (message) ->
+      message = _.escape message.substring(0,1000)
+      message = message.replace(/&#x27;/gi, "'")
+      message = @linkify message
+
+      message
+
+
     showMessage: (data) ->
       that = @
       me = @username is data.u
-      message = _.escape data.m.substring(0,1000)
-      message = message.replace("&#x27;", "'")
-      message = that.linkify message
+
+      message = @parseMessage data.m
 
       img = '<img src="http://'
       style = '" style="width:30px;height:30px;" class="img-circle">'
+
       message = message.replace(/(\[tonninseteli\])/gi, img + 'cdn.userpics.com/upload/tonninseteli.jpg' + style)
       message = message.replace(/(\[hitler\])/gi, img + 'static.ylilauta.org/files/wb/orig/1366214983604638.gif' + style)
       message = message.replace(/(\[ylilauta\])/gi, img + 'meemi.info/images/2/2a/Norppa_ylilauta_175px.png' + style)
@@ -91,15 +93,11 @@ define [
       username = username.replace(/(\[es\])/gi, img + 'static.ylilauta.org/files/ux/orig/1365450810932532.jpg' + style)
 
       color = data.u.toString(16).substring(0,6)
-      
-      m = message
-      @messages.append _.template Template, {m, me, color, username}
 
-      last = $(".message:last").offset().top
-      
+      @messages.append _.template Template, {m: message, me, color, username}
+
       $(".message:first").remove() if $(".message").length > 30
-
-      @window.scrollTop last
+      @window.scrollTop $(".message:last").offset().top
 
     listenDisconnect: ->
       that = @
@@ -116,10 +114,6 @@ define [
       count = $(".count")
       @socket.on "clients", (clients) ->
         count.text clients
-
-    clientCount: (r) ->
-      @socket.emit "count",
-        {r}
 
     listenJoin: ->
       that = @

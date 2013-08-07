@@ -1,5 +1,5 @@
 (function() {
-  var RedisStore, app, clients, clientsObject, cluster, express, http, i, io, numCPUs, path, pub, redis, redisClient, routes, server, sub;
+  var RedisStore, app, clientsObject, cluster, express, http, i, io, numCPUs, path, pub, redis, redisClient, routes, server, sub;
 
   express = require("express");
 
@@ -60,39 +60,68 @@
     redisClient: redisClient
   }));
 
-  clients = 0;
-
   clientsObject = {};
 
   io.sockets.on("connection", function(socket) {
+    var lastMessage, messageSent;
     clientsObject[socket.id] = socket;
-    clients++;
+    messageSent = null;
+    lastMessage = null;
+    redisClient.get("count", function(err, reply) {
+      var clients;
+      if (reply === null) {
+        clients = 0;
+      }
+      return redisClient.set("count", Number(reply) + 1);
+    });
     socket.on("join", function(data) {
-      socket.join(data.r);
-      return socket.emit("join", data.r);
+      var room;
+      room = data.r;
+      socket.join(room);
+      socket.emit("join", room);
+      return redisClient.get("count", function(err, reply) {
+        if (reply === null) {
+          reply = 0;
+        }
+        return io.sockets["in"](room).emit('clients', reply);
+      });
     });
     socket.on("disconnect", function() {
-      clients--;
+      redisClient.get("count", function(err, reply) {
+        var clients;
+        if (reply === null) {
+          clients = 1;
+        }
+        return redisClient.set("count", Number(reply) - 1);
+      });
       return delete clientsObject[socket.id];
     });
     socket.on("leave", function(data) {
       socket.leave(data.r);
       return socket.emit("leave", data.r);
     });
-    socket.on("count", function(data) {
-      return socket.emit('clients', clients);
-    });
     return socket.on("message", function(data) {
       var _ref;
       if (!((_ref = data.m) != null ? _ref.length : void 0)) {
         return;
       }
+      if (messageSent) {
+        return;
+      }
+      if (lastMessage === data.m) {
+        return;
+      }
+      lastMessage = data.m;
       data.m = data.m.substring(0, 1000);
       data.m = data.m.trim();
       if (!data.m.length) {
         return;
       }
-      return io.sockets["in"](data.r).emit('message', data);
+      io.sockets["in"](data.r).emit('message', data);
+      messageSent = true;
+      return setTimeout(function() {
+        messageSent = false;
+      }, 3000);
     });
   });
 
