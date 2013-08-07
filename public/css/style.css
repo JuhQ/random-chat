@@ -1,4 +1,6 @@
 .messages {
+  padding-bottom: 5px;
+  margin-bottom: 10px;
   overflow: auto;
 }
 .messages .panel {
