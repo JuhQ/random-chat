@@ -98,9 +98,7 @@
         if ($(".message").length > 30) {
           $(".message:first").remove();
         }
-        return $(".messages").animate({
-          scrollTop: "+=" + $(".message:last").offset().top + "px"
-        }, 1000);
+        return this.messages.scrollTop($(".message:last").offset().top);
       },
       listenDisconnect: function() {
         var that;

@@ -116,7 +116,7 @@ define [
 
       $(".message:first").remove() if $(".message").length > 30
       #@window.scrollTop $(".message:last").offset().top
-      $(".messages").animate({scrollTop: "+=" + $(".message:last").offset().top + "px"}, 1000)
+      @messages.scrollTop $(".message:last").offset().top
 
     listenDisconnect: ->
       that = @
