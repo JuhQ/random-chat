@@ -29,11 +29,7 @@ define [
       return
 
     setOptions: (options) ->
-      that = @
       @joinRoom options.room
-      @oldroom = options.room
-
-      return
 
     send: (u, message, r) ->
       that = @
@@ -43,10 +39,10 @@ define [
       m = message.substring(0,1000)
       m = m.trim()
 
-      return @showSpam(m) if @messageSent
-    
       _gaq.push(['_trackPageview'])
+
       return unless m.length
+      return @showSpam(m) if @messageSent
       return @showSpam(m) if @lastMessage is m
 
       @socket.emit "message", {u, m, r}
@@ -116,7 +112,8 @@ define [
       @messages.append _.template Template, {m: message, me, color, username}
 
       $(".message:first").remove() if $(".message").length > 30
-      @window.scrollTop $(".message:last").offset().top
+      #@window.scrollTop $(".message:last").offset().top
+      $(".messages").animate({scrollTop: "+=" + $(".message:last").offset().top + "px"}, 1000)
 
     listenDisconnect: ->
       that = @

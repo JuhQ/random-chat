@@ -4,17 +4,19 @@ define [
   "backbone"
   "models/chat"
   "collections/boards"
+  "views/youtube"
   ], (
   $
   _
   Backbone
   Model
   BoardsCollection
+  YoutubeView
   ) ->
   Backbone.View.extend
     el: "body"
     events:
-      "submit form": "sendMessage"
+      "submit form#message": "sendMessage"
 
     mainRoom: "random"
 
@@ -22,12 +24,27 @@ define [
       return min + Math.round(Math.random() * (max-min))
 
     initialize: ->
+      _.bindAll this, "resize"
       @username = String(@random(0, (new Date()).getTime())).substring(0,10)
       @username = Number @username
+      @messagesElement = $(".messages")
+      @youtubeElement = $(".youtube")
+
+      $(window).on "resize", @resize
+      @resize()
+
+      new YoutubeView()
 
       $("input[name='message']").bind "paste", (e) ->
         e.preventDefault()
       return
+
+    resize: ->
+      height = $(window).height() - 60
+      @messagesElement.css("max-height", height - 40)
+      @youtubeElement.css("max-height", height)
+      if $(".message:last").length
+        @messagesElement.animate({scrollTop: "+=" + $(".message:last").offset().top + "px"}, 1000)
 
     setOptions: (options) ->
       room = options.room || @mainRoom

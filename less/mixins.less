@@ -1,0 +1,9 @@
+
+.vertical(@startColor: #555, @endColor: #333) {
+  background-image: -webkit-gradient(linear, 0 100%, 0 0, from(@startColor), to(@endColor));
+  background-image: -webkit-linear-gradient(@startColor, @endColor);
+  background-image: -moz-linear-gradient(@startColor, @endColor);
+  background-image: -o-linear-gradient(@startColor, @endColor);
+  background-image: linear-gradient(@startColor, @endColor);
+  background-repeat: repeat-x;
+}

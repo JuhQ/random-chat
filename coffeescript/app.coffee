@@ -2,6 +2,7 @@ express = require("express")
 routes = require("./routes")
 http = require("http")
 path = require("path")
+googleapis = require('googleapis')
 app = express()
 server = http.createServer(app)
 app.configure ->
@@ -89,6 +90,26 @@ io.sockets.on "connection", (socket) ->
       messageSent = false
       return
     , 3000
+
+
+  socket.on "youtube-set", (data) ->
+    id = data.id.trim()
+    return unless id.length
+
+    googleApiKey = "AIzaSyDftKyCTCHfNw02mbE20RtLP28IX6ME_-g"
+    googleapis.discover("youtube", "v3").execute (err, client) ->
+      asd = client.youtube.videos.list(part: "snippet", id: id).withApiKey(googleApiKey)
+      asd.execute (err, response) ->
+
+        title = response.items[0].snippet.title
+        description = response.items[0].snippet.description.substring(0, 100)
+
+        console.log "description", description
+        console.log "title", title
+        console.log "id", id
+
+    socket.emit "youtube", id
+
 
 
 if cluster.isMaster

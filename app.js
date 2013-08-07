@@ -1,5 +1,5 @@
 (function() {
-  var RedisStore, app, clientsObject, cluster, express, http, i, io, numCPUs, path, pub, redis, redisClient, routes, server, sub;
+  var RedisStore, app, clientsObject, cluster, express, googleapis, http, i, io, numCPUs, path, pub, redis, redisClient, routes, server, sub;
 
   express = require("express");
 
@@ -8,6 +8,8 @@
   http = require("http");
 
   path = require("path");
+
+  googleapis = require('googleapis');
 
   app = express();
 
@@ -100,7 +102,7 @@
       socket.leave(data.r);
       return socket.emit("leave", data.r);
     });
-    return socket.on("message", function(data) {
+    socket.on("message", function(data) {
       var _ref;
       if (!((_ref = data.m) != null ? _ref.length : void 0)) {
         return;
@@ -122,6 +124,30 @@
       return setTimeout(function() {
         messageSent = false;
       }, 3000);
+    });
+    return socket.on("youtube-set", function(data) {
+      var googleApiKey, id;
+      id = data.id.trim();
+      if (!id.length) {
+        return;
+      }
+      googleApiKey = "AIzaSyDftKyCTCHfNw02mbE20RtLP28IX6ME_-g";
+      googleapis.discover("youtube", "v3").execute(function(err, client) {
+        var asd;
+        asd = client.youtube.videos.list({
+          part: "snippet",
+          id: id
+        }).withApiKey(googleApiKey);
+        return asd.execute(function(err, response) {
+          var description, title;
+          title = response.items[0].snippet.title;
+          description = response.items[0].snippet.description.substring(0, 100);
+          console.log("description", description);
+          console.log("title", title);
+          return console.log("id", id);
+        });
+      });
+      return socket.emit("youtube", id);
     });
   });
 

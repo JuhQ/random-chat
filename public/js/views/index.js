@@ -1,20 +1,37 @@
 (function() {
-  define(["jquery", "underscore", "backbone", "models/chat", "collections/boards"], function($, _, Backbone, Model, BoardsCollection) {
+  define(["jquery", "underscore", "backbone", "models/chat", "collections/boards", "views/youtube"], function($, _, Backbone, Model, BoardsCollection, YoutubeView) {
     return Backbone.View.extend({
       el: "body",
       events: {
-        "submit form": "sendMessage"
+        "submit form#message": "sendMessage"
       },
       mainRoom: "random",
       random: function(min, max) {
         return min + Math.round(Math.random() * (max - min));
       },
       initialize: function() {
+        _.bindAll(this, "resize");
         this.username = String(this.random(0, (new Date()).getTime())).substring(0, 10);
         this.username = Number(this.username);
+        this.messagesElement = $(".messages");
+        this.youtubeElement = $(".youtube");
+        $(window).on("resize", this.resize);
+        this.resize();
+        new YoutubeView();
         $("input[name='message']").bind("paste", function(e) {
           return e.preventDefault();
         });
+      },
+      resize: function() {
+        var height;
+        height = $(window).height() - 60;
+        this.messagesElement.css("max-height", height - 40);
+        this.youtubeElement.css("max-height", height);
+        if ($(".message:last").length) {
+          return this.messagesElement.animate({
+            scrollTop: "+=" + $(".message:last").offset().top + "px"
+          }, 1000);
+        }
       },
       setOptions: function(options) {
         var room;

@@ -1,13 +1,18 @@
-.panel {
-  padding: 5px;
-  margin-bottom: 2px;
-  &:last-child {
-    margin-bottom: 20px;
+@import "mixins.less";
+
+.messages {
+  overflow: auto;
+  .panel {
+    padding: 5px;
+    margin-bottom: 2px;
+    &:last-child {
+      margin-bottom: 20px;
+    }
+    border-top: none;
+    border-bottom: none;
+    border-left: none;
+    border-right: none;
   }
-  border-top: none;
-  border-bottom: none;
-  border-left: none;
-  border-right: none;
 }
 .square {
   -webkit-border-radius: 0 !important;
@@ -19,4 +24,21 @@
   max-width: 60%;
   text-align: right;
   overflow: scroll;
+}
+
+.youtube {
+  overflow: auto;
+  padding-bottom: 20px;
+  .youtube-container {
+    display: none;
+    iframe#player {
+      width: 100%;
+      min-height: 200px;
+      max-height: 250px;
+    }
+  }
+}
+
+.footer-indicator {
+  .vertical(rgba(255,255,255,0), #fff);
 }

@@ -19,6 +19,7 @@
         <noscript>
         <div class="col-lg-12">
           <h1>JAVASCRIPT PÄÄLLE JUMALAUTA!</h1>
+          <p>Aika tulla tulevaisuuteen.</p>
         </div>
       </noscript>
       <div class="col-lg-12">
@@ -29,12 +30,19 @@
         </p>
       </div>
       <div class="clearfix"></div>
-      <div class="messages col-lg-10"></div>
+      <div class="messages col-lg-8"></div>
+      <div class="youtube col-lg-4 visible-lg hidden">
+        <a href="#" class="show">Näytä illan virallinen Youtube playlist</a>
+        <div class="youtube-container">
+          <div class="player"></div>
+          <div class="playlist"></div>
+        </div>
+      </div>
 
       <div class="clearfix"></div>
 
       <div class="navbar-fixed-bottom bottom-nav">
-        <div style="background: white;">
+        <div class="footer-indicator">
           <div class="pull-left">
             IP-Laskusi <span class="count">0</span> euroa | 
             <!-- Paikalla <span class="count">0</span> spurdoa VITTU TOI LUKU EI TOIMI | -->
@@ -43,7 +51,7 @@
           <div class="pull-right rooms hidden"></div>
           <div class="clearfix"></div>
         </div>
-        <form class="form-inline">
+        <form class="form-inline" id="message">
           <div class="input-group">
             <input type="hidden" name="room" class="room" />
             <input type="text" class="form-control square" name="message" autocomplete="off" placeholder="Viesti" />

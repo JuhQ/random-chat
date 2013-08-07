@@ -4,7 +4,7 @@
     enforceDefine: true,
     urlArgs: "bust=" + (new Date()).getTime(),
     paths: {
-      jquery: ["http://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery"],
+      jquery: "http://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery",
       backbone: "libs/backbone",
       underscore: "libs/underscore",
       text: "libs/text",

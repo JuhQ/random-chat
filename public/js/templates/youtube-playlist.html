@@ -1,0 +1,21 @@
+<div class="media">
+
+<%
+collection.each(function(model) {
+%>
+
+  <a class="pull-left" href="#">
+    <img class="media-object" src="http://img.youtube.com/vi/<%=model.get("video")%>/2.jpg">
+  </a>
+  <div class="media-body">
+    <h4 class="media-heading"><%=model.get("name")%></h4>
+    <%=model.get("description")%>
+  </div>
+
+  <div class="clearfix"></div>
+
+<%
+});
+%>
+
+</div>

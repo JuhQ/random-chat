@@ -17,10 +17,7 @@
         this.socket = io.connect("http://" + window.location.host);
       },
       setOptions: function(options) {
-        var that;
-        that = this;
-        this.joinRoom(options.room);
-        this.oldroom = options.room;
+        return this.joinRoom(options.room);
       },
       send: function(u, message, r) {
         var m, that;
@@ -29,12 +26,12 @@
         this.username = u;
         m = message.substring(0, 1000);
         m = m.trim();
-        if (this.messageSent) {
-          return this.showSpam(m);
-        }
         _gaq.push(['_trackPageview']);
         if (!m.length) {
           return;
+        }
+        if (this.messageSent) {
+          return this.showSpam(m);
         }
         if (this.lastMessage === m) {
           return this.showSpam(m);
@@ -99,7 +96,9 @@
         if ($(".message").length > 30) {
           $(".message:first").remove();
         }
-        return this.window.scrollTop($(".message:last").offset().top);
+        return $(".messages").animate({
+          scrollTop: "+=" + $(".message:last").offset().top + "px"
+        }, 1000);
       },
       listenDisconnect: function() {
         var that;
