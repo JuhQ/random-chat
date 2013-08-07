@@ -78,6 +78,8 @@
         message = message.replace(/(\[dolan3\])/gi, img + 'static.ylilauta.org/files/mc/orig/1367351888390750.png' + style);
         message = message.replace(/(\[gooby\])/gi, img + 'static.ylilauta.org/files/q5/thumb/1372413598106457.png' + style);
         message = message.replace(/(\[gooby2\])/gi, img + 'static.ylilauta.org/files/gb/orig/1366516940725793.png' + style);
+        message = message.replace(/(\[tableflip\])/gi, img + 'static.ylilauta.org/files/be/orig/1372464326784921.jpg' + style);
+        message = message.replace(/(\[turku\])/gi, img + 'static.ylilauta.org/files/4z/thumb/1366709495720484.jpg' + style);
         username = _.escape(String(data.u).substring(0, 25));
         username = username.replace(/(\[tonninseteli\])/gi, img + 'cdn.userpics.com/upload/tonninseteli.jpg' + style);
         username = username.replace(/(\[hitler\])/gi, img + 'static.ylilauta.org/files/wb/orig/1366214983604638.gif' + style);
