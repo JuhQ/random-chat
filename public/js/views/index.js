@@ -15,22 +15,21 @@
         this.username = Number(this.username);
         this.messagesElement = $(".messages");
         this.youtubeElement = $(".youtube");
-        $(window).on("resize", this.resize);
+        this.window = $(window);
+        this.window.on("resize", this.resize);
         this.resize();
         new YoutubeView();
-        $("input[name='message']").bind("paste", function(e) {
+        return $("input[name='message']").bind("paste", function(e) {
           return e.preventDefault();
         });
       },
       resize: function() {
         var height;
-        height = $(window).height() - 60;
+        height = this.window.height() - 60;
         this.messagesElement.css("max-height", height - 40);
         this.youtubeElement.css("max-height", height);
         if ($(".message:last").length) {
-          return this.messagesElement.animate({
-            scrollTop: "+=" + $(".message:last").offset().top + "px"
-          }, 1000);
+          return this.messagesElement.scrollTop(1337);
         }
       },
       setOptions: function(options) {

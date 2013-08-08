@@ -29,22 +29,21 @@ define [
       @username = Number @username
       @messagesElement = $(".messages")
       @youtubeElement = $(".youtube")
+      @window = $(window)
 
-      $(window).on "resize", @resize
+      @window.on "resize", @resize
       @resize()
 
       new YoutubeView()
 
-      $("input[name='message']").bind "paste", (e) ->
-        e.preventDefault()
-      return
+      $("input[name='message']").bind "paste", (e) -> e.preventDefault()
 
     resize: ->
-      height = $(window).height() - 60
+      height = @window.height() - 60
       @messagesElement.css("max-height", height - 40)
       @youtubeElement.css("max-height", height)
       if $(".message:last").length
-        @messagesElement.animate({scrollTop: "+=" + $(".message:last").offset().top + "px"}, 1000)
+        @messagesElement.scrollTop 1337
 
     setOptions: (options) ->
       room = options.room || @mainRoom

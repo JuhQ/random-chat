@@ -11,16 +11,16 @@
 
   googleapis = require('googleapis');
 
-  app = express();
+  cluster = require("cluster");
 
-  server = http.createServer(app);
+  numCPUs = require("os").cpus().length;
+
+  app = express();
 
   app.configure(function() {
     app.set("port", process.env.PORT || 3099);
     app.set("views", __dirname + "/views");
     app.set("view engine", "ejs");
-    app.use(express.favicon());
-    app.use(express.logger("dev"));
     app.use(express.bodyParser());
     app.use(express.methodOverride());
     app.use(express.cookieParser("asdf"));
@@ -37,9 +37,7 @@
 
   app.get("/mad/test", routes.test);
 
-  cluster = require("cluster");
-
-  numCPUs = require("os").cpus().length;
+  server = http.createServer(app);
 
   io = require('socket.io').listen(server, {
     "browser client minification": true,

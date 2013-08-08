@@ -83,7 +83,6 @@ define [
       message = message.replace /(\[spurdo\])/gi, img + 'static.ylilauta.org/files/2s/orig/1367332063683775.png' + style
       message = message.replace /(\[nakkivene\])/gi, img + 'static.ylilauta.org/files/45/orig/1370161671660103.png' + style
       message = message.replace /(\[skeletor\])/gi, img + 'static.ylilauta.org/files/33/orig/1366231280662468.jpg' + style
-
       message = message.replace /(\[dolan\])/gi, img + 'static.ylilauta.org/files/tb/orig/1366557461577278.jpg' + style
       message = message.replace /(\[dolan2\])/gi, img + 'static.ylilauta.org/files/hh/orig/13705610491069.jpg' + style
       message = message.replace /(\[dolan3\])/gi, img + 'static.ylilauta.org/files/mc/orig/1367351888390750.png' + style
@@ -91,13 +90,12 @@ define [
       message = message.replace /(\[gooby2\])/gi, img + 'static.ylilauta.org/files/gb/orig/1366516940725793.png' + style
       message = message.replace /(\[tableflip\])/gi, img + 'static.ylilauta.org/files/be/orig/1372464326784921.jpg' + style
       message = message.replace /(\[turku\])/gi, img + 'static.ylilauta.org/files/4z/thumb/1366709495720484.jpg' + style
-      
-      
+      message = message.replace /(\[le_rainface\])/gi, img + 'static.ylilauta.org/files/ry/thumb/1375913804152820.gif' + style
+      message = message.replace /(\[rage\])/gi, img + 'static.ylilauta.org/files/os/orig/136600298030015.png' + style
+      message = message.replace /(\[poni\])/gi, img + 'static.ylilauta.org/files/2x/orig/137349973989444.gif' + style
 
       # copy this for new icons
       # message = message.replace /(\[skeletor\])/gi, img + '' + style
-
-
 
       username = _.escape String(data.u).substring(0,25)
 
@@ -114,9 +112,9 @@ define [
 
       @messages.append _.template Template, {m: message, me, color, username}
 
-      $(".message:first").remove() if $(".message").length > 30
+      $(".message:first").remove() if $(".message").length > 20
       #@window.scrollTop $(".message:last").offset().top
-      @messages.scrollTop $(".message:last").offset().top
+      @messages.scrollTop 1337
 
     listenDisconnect: ->
       that = @
@@ -142,14 +140,11 @@ define [
     listenLeave: ->
       @socket.on "leave", (room) ->
 
-
     joinRoom: (r) ->
-      @socket.emit "join",
-        {r}
+      @socket.emit "join", {r}
 
     leaveRoom: (r) ->
-      @socket.emit "leave",
-        {r}
+      @socket.emit "leave", {r}
 
     linkify: (str) ->
       re = [

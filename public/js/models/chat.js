@@ -80,6 +80,9 @@
         message = message.replace(/(\[gooby2\])/gi, img + 'static.ylilauta.org/files/gb/orig/1366516940725793.png' + style);
         message = message.replace(/(\[tableflip\])/gi, img + 'static.ylilauta.org/files/be/orig/1372464326784921.jpg' + style);
         message = message.replace(/(\[turku\])/gi, img + 'static.ylilauta.org/files/4z/thumb/1366709495720484.jpg' + style);
+        message = message.replace(/(\[le_rainface\])/gi, img + 'static.ylilauta.org/files/ry/thumb/1375913804152820.gif' + style);
+        message = message.replace(/(\[rage\])/gi, img + 'static.ylilauta.org/files/os/orig/136600298030015.png' + style);
+        message = message.replace(/(\[poni\])/gi, img + 'static.ylilauta.org/files/2x/orig/137349973989444.gif' + style);
         username = _.escape(String(data.u).substring(0, 25));
         username = username.replace(/(\[tonninseteli\])/gi, img + 'cdn.userpics.com/upload/tonninseteli.jpg' + style);
         username = username.replace(/(\[hitler\])/gi, img + 'static.ylilauta.org/files/wb/orig/1366214983604638.gif' + style);
@@ -95,10 +98,10 @@
           color: color,
           username: username
         }));
-        if ($(".message").length > 30) {
+        if ($(".message").length > 20) {
           $(".message:first").remove();
         }
-        return this.messages.scrollTop($(".message:last").offset().top);
+        return this.messages.scrollTop(1337);
       },
       listenDisconnect: function() {
         var that;
