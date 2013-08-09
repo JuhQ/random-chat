@@ -8,15 +8,37 @@
     clientBroadcast = {};
     clientsCount = 0;
     send.on("connection", function(conn) {
+      var lastMessage, messageSent;
       broadcast[conn.id] = conn;
+      messageSent = null;
+      lastMessage = null;
       conn.on("close", function() {
         return delete broadcast[conn.id];
       });
-      return conn.on("data", function(m) {
+      return conn.on("data", function(message) {
         var id, _results;
+        if (!(message != null ? message.length : void 0)) {
+          return;
+        }
+        if (messageSent) {
+          return;
+        }
+        if (lastMessage === message) {
+          return;
+        }
+        lastMessage = message;
+        message = message.substring(0, 1000);
+        message = message.trim();
+        if (!message.length) {
+          return;
+        }
+        messageSent = true;
+        setTimeout(function() {
+          messageSent = false;
+        }, 3000);
         _results = [];
         for (id in broadcast) {
-          _results.push(broadcast[id].write(m));
+          _results.push(broadcast[id].write(message));
         }
         return _results;
       });

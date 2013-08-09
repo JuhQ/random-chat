@@ -9,12 +9,32 @@ module.exports = (server) ->
 
   send.on "connection", (conn) ->
     broadcast[conn.id] = conn
+
+    messageSent = null
+    lastMessage = null
+
     conn.on "close", ->
       delete broadcast[conn.id]
 
-    conn.on "data", (m) ->
+    conn.on "data", (message) ->
+      return unless message?.length
+      return if messageSent
+  
+      return if lastMessage is message
+      lastMessage = message
+  
+      message = message.substring(0,1000)
+      message = message.trim()
+      return unless message.length
+  
+      messageSent = true
+      setTimeout ->
+        messageSent = false
+        return
+      , 3000
+
       for id of broadcast
-        broadcast[id].write m
+        broadcast[id].write message
 
   clients.on "connection", (conn) ->
     clientBroadcast[conn.id] = conn

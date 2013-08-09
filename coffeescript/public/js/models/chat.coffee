@@ -134,12 +134,24 @@ define [
       username = username.replace /(\[gooby\])/gi, img + 'static.ylilauta.org/files/q5/thumb/1372413598106457.png' + style
 
 
-      color = data.u.toString(16).substring(0,6)
+      color = if isNaN data.u
+        @toHex(data.u).substring(0,6)
+      else
+        data.u.toString(16).substring(0,6)
 
       @messages.append _.template Template, {m: message, me, color, username}
 
       $(".message:first").remove() if $(".message").length > 20
       @messages.scrollTop 1337
+
+    toHex: (str) ->
+      hex = ""
+      i = 0
+
+      while i < str.length
+        hex += "" + str.charCodeAt(i).toString(16)
+        i++
+      hex
 
     listenDisconnect: ->
       that = @

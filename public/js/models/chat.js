@@ -107,7 +107,7 @@
         username = username.replace(/(\[spurdo\])/gi, img + 'static.ylilauta.org/files/2s/orig/1367332063683775.png' + style);
         username = username.replace(/(\[nakkivene\])/gi, img + 'static.ylilauta.org/files/45/orig/1370161671660103.png' + style);
         username = username.replace(/(\[gooby\])/gi, img + 'static.ylilauta.org/files/q5/thumb/1372413598106457.png' + style);
-        color = data.u.toString(16).substring(0, 6);
+        color = isNaN(data.u) ? this.toHex(data.u).substring(0, 6) : data.u.toString(16).substring(0, 6);
         this.messages.append(_.template(Template, {
           m: message,
           me: me,
@@ -118,6 +118,16 @@
           $(".message:first").remove();
         }
         return this.messages.scrollTop(1337);
+      },
+      toHex: function(str) {
+        var hex, i;
+        hex = "";
+        i = 0;
+        while (i < str.length) {
+          hex += "" + str.charCodeAt(i).toString(16);
+          i++;
+        }
+        return hex;
       },
       listenDisconnect: function() {
         var that;
