@@ -29,6 +29,7 @@ define [
       @username = Number @username
       @messagesElement = $(".messages")
       @youtubeElement = $(".youtube")
+      @roomElement = $(".room")
       @window = $(window)
 
       @window.on "resize", @resize
@@ -48,11 +49,11 @@ define [
     setOptions: (options) ->
       room = options.room || @mainRoom
       @model = new Model() unless @model
-      @model.setOptions {room}
+      #@model.setOptions {room}
       @setBoards(room)
 
     leaveRoom: () ->
-      @model.leaveRoom($(".room").val())
+      #@model.leaveRoom($(".room").val())
       @$(".messages").html("")
 
     sendMessage: (event) ->
@@ -77,7 +78,7 @@ define [
         return
 
       clearForm()
-      room = $(".room").val()
+      room = @roomElement.val()
       @model.send @username, message, room
 
     commands: (command) ->

@@ -1,5 +1,5 @@
 (function() {
-  var RedisStore, app, clientsObject, cluster, express, http, i, io, numCPUs, path, pub, redis, redisClient, routes, server, sub, youtube;
+  var app, cluster, express, http, i, numCPUs, path, routes, server, sock;
 
   express = require("express");
 
@@ -10,8 +10,6 @@
   path = require("path");
 
   cluster = require("cluster");
-
-  youtube = require("./controllers/youtube");
 
   numCPUs = require("os").cpus().length;
 
@@ -39,101 +37,7 @@
 
   server = http.createServer(app);
 
-  io = require('socket.io').listen(server, {
-    "browser client minification": true,
-    log: false
-  });
-
-  RedisStore = require("socket.io/lib/stores/redis");
-
-  redis = require("redis");
-
-  pub = redis.createClient();
-
-  sub = redis.createClient();
-
-  redisClient = redis.createClient();
-
-  io.set("store", new RedisStore({
-    redisPub: pub,
-    redisSub: sub,
-    redisClient: redisClient
-  }));
-
-  clientsObject = {};
-
-  io.sockets.on("connection", function(socket) {
-    var lastMessage, messageSent;
-    clientsObject[socket.id] = socket;
-    messageSent = null;
-    lastMessage = null;
-    redisClient.get("count", function(err, reply) {
-      var clients;
-      if (reply === null) {
-        clients = 0;
-      }
-      return redisClient.set("count", Number(reply) + 1);
-    });
-    socket.on("join", function(data) {
-      var room;
-      room = data.r;
-      socket.join(room);
-      socket.emit("join", room);
-      return redisClient.get("count", function(err, reply) {
-        if (reply === null) {
-          reply = 0;
-        }
-        return io.sockets["in"](room).emit('clients', reply);
-      });
-    });
-    socket.on("disconnect", function() {
-      redisClient.get("count", function(err, reply) {
-        var clients;
-        if (reply === null) {
-          clients = 1;
-        }
-        return redisClient.set("count", Number(reply) - 1);
-      });
-      return delete clientsObject[socket.id];
-    });
-    socket.on("leave", function(data) {
-      socket.leave(data.r);
-      return socket.emit("leave", data.r);
-    });
-    socket.on("message", function(data) {
-      var _ref;
-      if (!((_ref = data.m) != null ? _ref.length : void 0)) {
-        return;
-      }
-      if (messageSent) {
-        return;
-      }
-      if (lastMessage === data.m) {
-        return;
-      }
-      lastMessage = data.m;
-      data.m = data.m.substring(0, 1000);
-      data.m = data.m.trim();
-      if (!data.m.length) {
-        return;
-      }
-      io.sockets["in"](data.r).emit('message', data);
-      messageSent = true;
-      return setTimeout(function() {
-        messageSent = false;
-      }, 3000);
-    });
-    return socket.on("youtube-set", function(data) {
-      var id;
-      id = data.id.trim();
-      if (!id.length) {
-        return;
-      }
-      return youtube(id, function() {
-        return socket.emit("youtube", id);
-      });
-    });
-  });
+  sock = require("./controllers/sockets")(server);
 
   if (cluster.isMaster) {
     i = 0;

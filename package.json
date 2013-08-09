@@ -12,7 +12,9 @@
     "socket.io": "~0.9.14",
     "redis": "~0.8.4",
     "hiredis": "~0.1.15",
-    "googleapis": "~0.4.2"
+    "googleapis": "~0.4.2",
+    "rbytes": "~1.0.0",
+    "sockjs": "~0.3.7"
   },
   "devDependencies": {
     "grunt": "~0.4.1",

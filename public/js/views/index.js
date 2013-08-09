@@ -15,6 +15,7 @@
         this.username = Number(this.username);
         this.messagesElement = $(".messages");
         this.youtubeElement = $(".youtube");
+        this.roomElement = $(".room");
         this.window = $(window);
         this.window.on("resize", this.resize);
         this.resize();
@@ -38,13 +39,9 @@
         if (!this.model) {
           this.model = new Model();
         }
-        this.model.setOptions({
-          room: room
-        });
         return this.setBoards(room);
       },
       leaveRoom: function() {
-        this.model.leaveRoom($(".room").val());
         return this.$(".messages").html("");
       },
       sendMessage: function(event) {
@@ -71,7 +68,7 @@
           return;
         }
         clearForm();
-        room = $(".room").val();
+        room = this.roomElement.val();
         return this.model.send(this.username, message, room);
       },
       commands: function(command) {

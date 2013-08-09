@@ -1,35 +1,61 @@
 define [
   "underscore"
   "backbone"
-  "socketio"
+  #"socketio"
+  "sockjs"
   "text!templates/message.html"
   ], (
   _
   Backbone
-  io
+  #io
+  socks
   Template
   ) ->
   Backbone.Model.extend
     initialize: (options) ->
+      @host = "http://#{window.location.host}"
       @messages = $(".messages")
       @window = $(window)
 
       @messageSent = null
       @lastMessage = null
+      
+
       @connect()
+
+      ###
+      @connect()
+      ###
 
       @listenChat()
       @listenCount()
+
+      ###
       @listenJoin()
       @listenLeave()
       @listenDisconnect()
+      ###
+
 
     connect: ->
-      @socket = io.connect("http://" + window.location.host)
+      @sock = new SockJS("#{@host}/send")
+      @sock
+
+    listenCount: ->
+      sock = new SockJS("#{@host}/clients")
+
+      count = $(".count")
+      sock.onmessage = (e) ->
+        count.text (JSON.parse e.data)
+
       return
 
+    #connect: ->
+    #  @socket = io.connect("http://#{window.location.host}")
+    #  return
+
     setOptions: (options) ->
-      @joinRoom options.room
+      #@joinRoom options.room
 
     send: (u, message, r) ->
       that = @
@@ -45,7 +71,8 @@ define [
       return @showSpam(m) if @messageSent
       return @showSpam(m) if @lastMessage is m
 
-      @socket.emit "message", {u, m, r}
+      @sock.send JSON.stringify {u, m, r}
+      #@socket.emit "message", {u, m, r}
 
       @messageSent = true
       @lastMessage = m
@@ -63,9 +90,7 @@ define [
       message = _.escape message.substring(0,1000)
       message = message.replace(/&#x27;/gi, "'")
       message = @linkify message
-
       message
-
 
     showMessage: (data) ->
       that = @
@@ -93,6 +118,7 @@ define [
       message = message.replace /(\[le_rainface\])/gi, img + 'static.ylilauta.org/files/ry/thumb/1375913804152820.gif' + style
       message = message.replace /(\[rage\])/gi, img + 'static.ylilauta.org/files/os/orig/136600298030015.png' + style
       message = message.replace /(\[poni\])/gi, img + 'static.ylilauta.org/files/2x/orig/137349973989444.gif' + style
+      message = message.replace /(\[mario\])/gi, img + 'kikki.alilauta.org/original/30994.gif' + style
 
       # copy this for new icons
       # message = message.replace /(\[skeletor\])/gi, img + '' + style
@@ -113,7 +139,6 @@ define [
       @messages.append _.template Template, {m: message, me, color, username}
 
       $(".message:first").remove() if $(".message").length > 20
-      #@window.scrollTop $(".message:last").offset().top
       @messages.scrollTop 1337
 
     listenDisconnect: ->
@@ -123,28 +148,31 @@ define [
 
     listenChat: ->
       that = @
-      @socket.on "message", (data) ->
-        that.showMessage(data)
+      @sock.onmessage = (e) ->
+        that.showMessage(JSON.parse e.data)
 
-    listenCount: ->
-      that = @
-      count = $(".count")
-      @socket.on "clients", (clients) ->
-        count.text clients
+      return
+      #@socket.on "message", (data) ->
+      #  that.showMessage(data)
 
-    listenJoin: ->
-      that = @
-      @socket.on "join", (room) ->
-        $(".room").val(room)
+    #listenCount: ->
+    #  that = @
+    #  count = $(".count")
+    #  @socket.on "clients", (clients) ->
+    #    count.text clients
 
-    listenLeave: ->
-      @socket.on "leave", (room) ->
+    #listenJoin: ->
+    #  @socket.on "join", (room) ->
+    #    $(".room").val(room)
 
-    joinRoom: (r) ->
-      @socket.emit "join", {r}
+    #listenLeave: ->
+    #  @socket.on "leave", (room) ->
 
-    leaveRoom: (r) ->
-      @socket.emit "leave", {r}
+    #joinRoom: (r) ->
+    #  @socket.emit "join", {r}
+
+    #leaveRoom: (r) ->
+    #  @socket.emit "leave", {r}
 
     linkify: (str) ->
       re = [

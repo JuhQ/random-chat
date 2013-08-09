@@ -1,24 +1,39 @@
 (function() {
-  define(["underscore", "backbone", "socketio", "text!templates/message.html"], function(_, Backbone, io, Template) {
+  define(["underscore", "backbone", "sockjs", "text!templates/message.html"], function(_, Backbone, socks, Template) {
     return Backbone.Model.extend({
       initialize: function(options) {
+        this.host = "http://" + window.location.host;
         this.messages = $(".messages");
         this.window = $(window);
         this.messageSent = null;
         this.lastMessage = null;
         this.connect();
+        /*
+        @connect()
+        */
+
         this.listenChat();
-        this.listenCount();
-        this.listenJoin();
-        this.listenLeave();
-        return this.listenDisconnect();
+        return this.listenCount();
+        /*
+        @listenJoin()
+        @listenLeave()
+        @listenDisconnect()
+        */
+
       },
       connect: function() {
-        this.socket = io.connect("http://" + window.location.host);
+        this.sock = new SockJS("" + this.host + "/send");
+        return this.sock;
       },
-      setOptions: function(options) {
-        return this.joinRoom(options.room);
+      listenCount: function() {
+        var count, sock;
+        sock = new SockJS("" + this.host + "/clients");
+        count = $(".count");
+        sock.onmessage = function(e) {
+          return count.text(JSON.parse(e.data));
+        };
       },
+      setOptions: function(options) {},
       send: function(u, message, r) {
         var m, that;
         that = this;
@@ -36,11 +51,11 @@
         if (this.lastMessage === m) {
           return this.showSpam(m);
         }
-        this.socket.emit("message", {
+        this.sock.send(JSON.stringify({
           u: u,
           m: m,
           r: r
-        });
+        }));
         this.messageSent = true;
         this.lastMessage = m;
         setTimeout(function() {
@@ -83,6 +98,7 @@
         message = message.replace(/(\[le_rainface\])/gi, img + 'static.ylilauta.org/files/ry/thumb/1375913804152820.gif' + style);
         message = message.replace(/(\[rage\])/gi, img + 'static.ylilauta.org/files/os/orig/136600298030015.png' + style);
         message = message.replace(/(\[poni\])/gi, img + 'static.ylilauta.org/files/2x/orig/137349973989444.gif' + style);
+        message = message.replace(/(\[mario\])/gi, img + 'kikki.alilauta.org/original/30994.gif' + style);
         username = _.escape(String(data.u).substring(0, 25));
         username = username.replace(/(\[tonninseteli\])/gi, img + 'cdn.userpics.com/upload/tonninseteli.jpg' + style);
         username = username.replace(/(\[hitler\])/gi, img + 'static.ylilauta.org/files/wb/orig/1366214983604638.gif' + style);
@@ -113,37 +129,9 @@
       listenChat: function() {
         var that;
         that = this;
-        return this.socket.on("message", function(data) {
-          return that.showMessage(data);
-        });
-      },
-      listenCount: function() {
-        var count, that;
-        that = this;
-        count = $(".count");
-        return this.socket.on("clients", function(clients) {
-          return count.text(clients);
-        });
-      },
-      listenJoin: function() {
-        var that;
-        that = this;
-        return this.socket.on("join", function(room) {
-          return $(".room").val(room);
-        });
-      },
-      listenLeave: function() {
-        return this.socket.on("leave", function(room) {});
-      },
-      joinRoom: function(r) {
-        return this.socket.emit("join", {
-          r: r
-        });
-      },
-      leaveRoom: function(r) {
-        return this.socket.emit("leave", {
-          r: r
-        });
+        this.sock.onmessage = function(e) {
+          return that.showMessage(JSON.parse(e.data));
+        };
       },
       linkify: function(str) {
         var re;
