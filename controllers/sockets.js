@@ -1,10 +1,11 @@
 (function() {
   module.exports = function(server) {
-    var broadcast, clientBroadcast, clients, clientsCount, send, sockjs;
+    var broadcast, clientBroadcast, clients, clientsCount, rooms, send, sockjs;
     sockjs = require("sockjs");
     send = sockjs.createServer();
     clients = sockjs.createServer();
     broadcast = {};
+    rooms = {};
     clientBroadcast = {};
     clientsCount = 0;
     send.on("connection", function(conn) {
@@ -13,23 +14,43 @@
       messageSent = null;
       lastMessage = null;
       conn.on("close", function() {
-        return delete broadcast[conn.id];
-      });
-      return conn.on("data", function(message) {
         var id, _results;
-        if (!(message != null ? message.length : void 0)) {
+        delete broadcast[conn.id];
+        _results = [];
+        for (id in rooms) {
+          if (rooms[id][conn.id]) {
+            delete rooms[id][conn.id];
+          }
+          if (!Object.keys(rooms[id])) {
+            _results.push(delete rooms[id]);
+          } else {
+            _results.push(void 0);
+          }
+        }
+        return _results;
+      });
+      return conn.on("data", function(data) {
+        var id, room, _ref, _results;
+        data = JSON.parse(data);
+        room = data.r || "";
+        console.log("room", room);
+        if (!rooms[room]) {
+          rooms[room] = {};
+        }
+        rooms[room][conn.id] = conn;
+        if (!((_ref = data.m) != null ? _ref.length : void 0)) {
           return;
         }
         if (messageSent) {
           return;
         }
-        if (lastMessage === message) {
+        if (lastMessage === data.m) {
           return;
         }
-        lastMessage = message;
-        message = message.substring(0, 1000);
-        message = message.trim();
-        if (!message.length) {
+        lastMessage = data.m;
+        data.m = data.m.substring(0, 1000);
+        data.m = data.m.trim();
+        if (!data.m.length) {
           return;
         }
         messageSent = true;
@@ -37,8 +58,8 @@
           messageSent = false;
         }, 3000);
         _results = [];
-        for (id in broadcast) {
-          _results.push(broadcast[id].write(message));
+        for (id in rooms[room]) {
+          _results.push(rooms[room][id].write(JSON.stringify(data)));
         }
         return _results;
       });

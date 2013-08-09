@@ -106,7 +106,7 @@ define [
       else
         $(".room-name").text(room)
 
-
+      @roomElement.val(room)
       rooms = $(".rooms")
       rooms.html("")
       @boards.each (model) ->

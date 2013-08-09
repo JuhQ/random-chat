@@ -37,9 +37,34 @@ define [
       ###
 
 
-    connect: ->
+    initSocket: ->
       @sock = new SockJS("#{@host}/send")
-      @sock
+      return
+    connect: ->
+      that = @
+      @initSocket()
+
+      ###
+      @sock.onclose = ->
+        that.openSocket = false
+        
+        that.openInterval = setInterval ->
+          that.initSocket()
+          console.log "opening..."
+
+          if that.openSocket
+            clearInterval that.openInterval
+        , 1000
+
+        
+        console.log "close sock"
+
+      @sock.onopen = ->
+        that.openSocket = true
+        console.log "open sock"
+      ###
+
+      return
 
     listenCount: ->
       sock = new SockJS("#{@host}/clients")
@@ -47,6 +72,9 @@ define [
       count = $(".count")
       sock.onmessage = (e) ->
         count.text (JSON.parse e.data)
+
+      #sock.onclose = ->
+      #  console.log "close"
 
       return
 
@@ -153,10 +181,10 @@ define [
         i++
       hex
 
-    listenDisconnect: ->
-      that = @
-      @socket.on "disconnect", (data) ->
-        that.connect()
+    #listenDisconnect: ->
+    #  that = @
+    #  @socket.on "disconnect", (data) ->
+    #    that.connect()
 
     listenChat: ->
       that = @

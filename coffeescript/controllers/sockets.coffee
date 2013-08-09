@@ -4,6 +4,7 @@ module.exports = (server) ->
   clients = sockjs.createServer()
 
   broadcast = {}
+  rooms = {}
   clientBroadcast = {}
   clientsCount = 0
 
@@ -16,16 +17,32 @@ module.exports = (server) ->
     conn.on "close", ->
       delete broadcast[conn.id]
 
-    conn.on "data", (message) ->
-      return unless message?.length
+      for id of rooms
+        if rooms[id][conn.id]
+          delete rooms[id][conn.id]
+        unless Object.keys(rooms[id])
+          delete rooms[id]
+
+
+    conn.on "data", (data) ->
+      data = JSON.parse data
+
+      room = data.r or ""
+
+      console.log "room", room
+
+      rooms[room] = {} unless rooms[room]
+      rooms[room][conn.id] = conn
+
+      return unless data.m?.length
       return if messageSent
   
-      return if lastMessage is message
-      lastMessage = message
+      return if lastMessage is data.m
+      lastMessage = data.m
   
-      message = message.substring(0,1000)
-      message = message.trim()
-      return unless message.length
+      data.m = data.m.substring(0,1000)
+      data.m = data.m.trim()
+      return unless data.m.length
   
       messageSent = true
       setTimeout ->
@@ -33,8 +50,9 @@ module.exports = (server) ->
         return
       , 3000
 
-      for id of broadcast
-        broadcast[id].write message
+      for id of rooms[room]
+        rooms[room][id].write JSON.stringify data
+        #broadcast[id].write JSON.stringify data
 
   clients.on "connection", (conn) ->
     clientBroadcast[conn.id] = conn

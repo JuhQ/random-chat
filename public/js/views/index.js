@@ -95,6 +95,7 @@
         } else {
           $(".room-name").text(room);
         }
+        this.roomElement.val(room);
         rooms = $(".rooms");
         rooms.html("");
         return this.boards.each(function(model) {

@@ -21,9 +21,33 @@
         */
 
       },
-      connect: function() {
+      initSocket: function() {
         this.sock = new SockJS("" + this.host + "/send");
-        return this.sock;
+      },
+      connect: function() {
+        var that;
+        that = this;
+        this.initSocket();
+        /*
+        @sock.onclose = ->
+          that.openSocket = false
+          
+          that.openInterval = setInterval ->
+            that.initSocket()
+            console.log "opening..."
+        
+            if that.openSocket
+              clearInterval that.openInterval
+          , 1000
+        
+          
+          console.log "close sock"
+        
+        @sock.onopen = ->
+          that.openSocket = true
+          console.log "open sock"
+        */
+
       },
       listenCount: function() {
         var count, sock;
@@ -128,13 +152,6 @@
           i++;
         }
         return hex;
-      },
-      listenDisconnect: function() {
-        var that;
-        that = this;
-        return this.socket.on("disconnect", function(data) {
-          return that.connect();
-        });
       },
       listenChat: function() {
         var that;
