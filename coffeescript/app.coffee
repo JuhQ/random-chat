@@ -30,7 +30,7 @@ server = http.createServer(app)
 sock = require("./controllers/sockets")(server)
 #socketio = require("./controllers/socketio")(server)
 
-
+###
 if cluster.isMaster
   
   # Fork workers.
@@ -45,6 +45,7 @@ if cluster.isMaster
     #cluster.fork()
 
 else
+###
 
-  server.listen app.get("port"), ->
-    console.log "Express server listening on port " + app.get("port")
+server.listen app.get("port"), ->
+  console.log "Express server listening on port " + app.get("port")

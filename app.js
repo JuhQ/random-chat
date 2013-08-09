@@ -1,5 +1,5 @@
 (function() {
-  var app, cluster, express, http, i, numCPUs, path, routes, server, sock;
+  var app, cluster, express, http, numCPUs, path, routes, server, sock;
 
   express = require("express");
 
@@ -39,19 +39,26 @@
 
   sock = require("./controllers/sockets")(server);
 
-  if (cluster.isMaster) {
-    i = 0;
-    while (i < numCPUs) {
-      cluster.fork();
-      i++;
-    }
-    cluster.on("exit", function(worker, code, signal) {
-      return console.log("worker " + worker.process.pid + " died");
-    });
-  } else {
-    server.listen(app.get("port"), function() {
-      return console.log("Express server listening on port " + app.get("port"));
-    });
-  }
+  /*
+  if cluster.isMaster
+    
+    # Fork workers.
+    i = 0
+    while i < numCPUs
+      cluster.fork()
+      i++
+  
+    # Revive dead worker
+    cluster.on "exit", (worker, code, signal) ->
+      console.log "worker " + worker.process.pid + " died"
+      #cluster.fork()
+  
+  else
+  */
+
+
+  server.listen(app.get("port"), function() {
+    return console.log("Express server listening on port " + app.get("port"));
+  });
 
 }).call(this);
