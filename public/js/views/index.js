@@ -48,12 +48,17 @@
         return this.$(".messages").html("");
       },
       sendMessage: function(event) {
-        var clearForm, command, input, message, room;
+        var clearForm, command, input, message, room, target, usernameInput;
         event.preventDefault();
-        input = $(event.target).find("input[name='message']");
+        target = $(event.target);
+        input = target.find("input[name='message']");
         message = input.val();
         if (!message) {
           return;
+        }
+        usernameInput = target.find("input[name='username']");
+        if (usernameInput.val().length) {
+          this.changeUsername(usernameInput.val());
         }
         clearForm = function() {
           input.val("");
@@ -74,8 +79,11 @@
         if ((_ref = command[1]) === "join" || _ref === "j") {
           Backbone.history.navigate("#" + command[2].replace("#", ""));
         } else if (command[1] === "nick") {
-          this.username = command[2].substring(0, 25);
+          this.changeUsername(command[2]);
         }
+      },
+      changeUsername: function(username) {
+        this.username = username.substring(0, 25).trim();
       },
       setBoards: function(room) {
         var board, rooms;

@@ -57,9 +57,13 @@ define [
 
     sendMessage: (event) ->
       event.preventDefault()
-      input = $(event.target).find("input[name='message']")
+      target = $(event.target)
+      input = target.find("input[name='message']")
       message = input.val()
       return unless message
+
+      usernameInput = target.find("input[name='username']")
+      @changeUsername usernameInput.val() if usernameInput.val().length
 
       clearForm = ->
         input.val("")
@@ -81,10 +85,13 @@ define [
         Backbone.history.navigate("#" + command[2].replace("#",""))
 
       else if command[1] is "nick"
-        @username = command[2].substring(0,25)
+        @changeUsername command[2]
 
       return
 
+    changeUsername: (username) ->
+      @username = username.substring(0,25).trim()
+      return
 
     # TODO: make separate view for boards
     setBoards: (room) ->

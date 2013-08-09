@@ -19,12 +19,6 @@
   -moz-border-radius: 0 !important;
   border-radius: 0 !important;
 }
-.rooms {
-  max-height: 20px;
-  max-width: 60%;
-  text-align: right;
-  overflow: scroll;
-}
 .youtube {
   overflow: auto;
   padding-bottom: 20px;
@@ -37,7 +31,17 @@
   min-height: 200px;
   max-height: 250px;
 }
-.footer-indicator {
+.bottom-nav .usernameInput {
+  max-width: 115px;
+  font-weight: bold;
+}
+.bottom-nav .rooms {
+  max-height: 20px;
+  max-width: 60%;
+  text-align: right;
+  overflow: scroll;
+}
+.bottom-nav .footer-indicator {
   background-image: -webkit-gradient(linear, 0 100%, 0 0, from(rgba(255, 255, 255, 0)), to(#ffffff));
   background-image: -webkit-linear-gradient(rgba(255, 255, 255, 0), #ffffff);
   background-image: -moz-linear-gradient(rgba(255, 255, 255, 0), #ffffff);

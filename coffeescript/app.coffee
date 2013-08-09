@@ -2,8 +2,8 @@ express = require("express")
 routes = require("./routes")
 http = require("http")
 path = require("path")
-googleapis = require('googleapis')
 cluster = require("cluster")
+youtube = require("./controllers/youtube")
 numCPUs = require("os").cpus().length
 
 app = express()
@@ -24,7 +24,6 @@ app.configure "development", ->
 
 app.get "/", routes.index
 app.get "/mad/test", routes.test
-
 
 
 server = http.createServer(app)
@@ -96,20 +95,8 @@ io.sockets.on "connection", (socket) ->
     id = data.id.trim()
     return unless id.length
 
-    googleApiKey = "AIzaSyDftKyCTCHfNw02mbE20RtLP28IX6ME_-g"
-    googleapis.discover("youtube", "v3").execute (err, client) ->
-      asd = client.youtube.videos.list(part: "snippet", id: id).withApiKey(googleApiKey)
-      asd.execute (err, response) ->
-
-        title = response.items[0].snippet.title
-        description = response.items[0].snippet.description.substring(0, 100)
-
-        console.log "description", description
-        console.log "title", title
-        console.log "id", id
-
-    socket.emit "youtube", id
-
+    youtube id, ->
+      socket.emit "youtube", id
 
 
 if cluster.isMaster
