@@ -21,7 +21,7 @@ define [
       @lastMessage = null
       
 
-      @connect()
+      @connect(options.room)
 
       ###
       @connect()
@@ -40,9 +40,12 @@ define [
     initSocket: ->
       @sock = new SockJS("#{@host}/send")
       return
-    connect: ->
+    connect: (room) ->
       that = @
       @initSocket()
+      @sock.onopen = ->
+        that.openSocket = true
+        that.sock.send JSON.stringify {u: "", m: "", r: room}
 
       ###
       @sock.onclose = ->

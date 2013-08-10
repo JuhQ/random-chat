@@ -29,8 +29,6 @@ module.exports = (server) ->
 
       room = data.r or ""
 
-      console.log "room", room
-
       rooms[room] = {} unless rooms[room]
       rooms[room][conn.id] = conn
 

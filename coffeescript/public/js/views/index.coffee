@@ -48,7 +48,7 @@ define [
 
     setOptions: (options) ->
       room = options.room || @mainRoom
-      @model = new Model() unless @model
+      @model = new Model({room}) unless @model
       #@model.setOptions {room}
       @setBoards(room)
 

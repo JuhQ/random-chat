@@ -7,7 +7,7 @@
         this.window = $(window);
         this.messageSent = null;
         this.lastMessage = null;
-        this.connect();
+        this.connect(options.room);
         /*
         @connect()
         */
@@ -24,10 +24,18 @@
       initSocket: function() {
         this.sock = new SockJS("" + this.host + "/send");
       },
-      connect: function() {
+      connect: function(room) {
         var that;
         that = this;
         this.initSocket();
+        this.sock.onopen = function() {
+          that.openSocket = true;
+          return that.sock.send(JSON.stringify({
+            u: "",
+            m: "",
+            r: room
+          }));
+        };
         /*
         @sock.onclose = ->
           that.openSocket = false

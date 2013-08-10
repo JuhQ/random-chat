@@ -37,7 +37,9 @@
         var room;
         room = options.room || this.mainRoom;
         if (!this.model) {
-          this.model = new Model();
+          this.model = new Model({
+            room: room
+          });
         }
         return this.setBoards(room);
       },

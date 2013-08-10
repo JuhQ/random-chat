@@ -33,7 +33,6 @@
         var id, room, _ref, _results;
         data = JSON.parse(data);
         room = data.r || "";
-        console.log("room", room);
         if (!rooms[room]) {
           rooms[room] = {};
         }
