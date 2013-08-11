@@ -4,7 +4,7 @@ module.exports = (server) ->
 
   # Redis publisher
   publisher = redis.createClient()
-  redisClient = redis.createClient()
+  
   clientCountClient = redis.createClient()
 
   clientCount = redis.createClient()
@@ -14,7 +14,7 @@ module.exports = (server) ->
   clients = sockjs.createServer()
 
   send.on "connection", (conn) ->
-
+    redisClient = redis.createClient()
     messageSent = null
     lastMessage = null
 
@@ -22,8 +22,8 @@ module.exports = (server) ->
     redisClient.on "message", (channel, message) ->
       conn.write message
 
-    #conn.on "close", ->
-      #redisClient.end()
+    conn.on "close", ->
+      redisClient.end()
 
     conn.on "data", (data) ->
       data = JSON.parse data

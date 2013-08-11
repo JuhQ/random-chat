@@ -1,21 +1,24 @@
 (function() {
   module.exports = function(server) {
-    var clientCount, clientCountClient, clients, publisher, redis, redisClient, send, sockjs;
+    var clientCount, clientCountClient, clients, publisher, redis, send, sockjs;
     sockjs = require("sockjs");
     redis = require("redis");
     publisher = redis.createClient();
-    redisClient = redis.createClient();
     clientCountClient = redis.createClient();
     clientCount = redis.createClient();
     clientCount.subscribe("count");
     send = sockjs.createServer();
     clients = sockjs.createServer();
     send.on("connection", function(conn) {
-      var lastMessage, messageSent;
+      var lastMessage, messageSent, redisClient;
+      redisClient = redis.createClient();
       messageSent = null;
       lastMessage = null;
       redisClient.on("message", function(channel, message) {
         return conn.write(message);
+      });
+      conn.on("close", function() {
+        return redisClient.end();
       });
       return conn.on("data", function(data) {
         var room, _ref;
