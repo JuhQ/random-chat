@@ -1,14 +1,17 @@
 (function() {
   module.exports = function(server) {
-    var clients, publisher, redis, send, sockjs;
+    var clientCount, clientCountClient, clients, publisher, redis, redisClient, send, sockjs;
     sockjs = require("sockjs");
     redis = require("redis");
     publisher = redis.createClient();
+    redisClient = redis.createClient();
+    clientCountClient = redis.createClient();
+    clientCount = redis.createClient();
+    clientCount.subscribe("count");
     send = sockjs.createServer();
     clients = sockjs.createServer();
     send.on("connection", function(conn) {
-      var lastMessage, messageSent, redisClient;
-      redisClient = redis.createClient();
+      var lastMessage, messageSent;
       messageSent = null;
       lastMessage = null;
       redisClient.on("message", function(channel, message) {
@@ -42,21 +45,18 @@
       });
     });
     clients.on("connection", function(conn) {
-      var broadcastCount, clientCount, redisClient;
-      redisClient = redis.createClient();
-      clientCount = redis.createClient();
-      redisClient.subscribe("count");
-      clientCount.get("clientCount", function(err, reply) {
+      var broadcastCount;
+      clientCountClient.get("clientCount", function(err, reply) {
         if (reply === null) {
           reply = 0;
         }
-        return clientCount.set("clientCount", Number(reply) + 1);
+        return clientCountClient.set("clientCount", Number(reply) + 1);
       });
-      redisClient.on("message", function(channel, message) {
+      clientCount.on("message", function(channel, message) {
         return conn.write(message);
       });
       broadcastCount = function() {
-        return clientCount.get("clientCount", function(err, reply) {
+        return clientCountClient.get("clientCount", function(err, reply) {
           if (reply === null) {
             reply = 0;
           }
@@ -65,11 +65,11 @@
       };
       broadcastCount();
       return conn.on("close", function() {
-        return clientCount.get("clientCount", function(err, reply) {
+        return clientCountClient.get("clientCount", function(err, reply) {
           if (reply === null) {
             reply = 1;
           }
-          clientCount.set("clientCount", Number(reply) - 1);
+          clientCountClient.set("clientCount", Number(reply) - 1);
           return broadcastCount();
         });
       });

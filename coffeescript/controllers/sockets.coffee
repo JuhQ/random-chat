@@ -4,12 +4,16 @@ module.exports = (server) ->
 
   # Redis publisher
   publisher = redis.createClient()
+  redisClient = redis.createClient()
+  clientCountClient = redis.createClient()
 
+  clientCount = redis.createClient()
+  clientCount.subscribe "count"
+    
   send = sockjs.createServer()
   clients = sockjs.createServer()
 
   send.on "connection", (conn) ->
-    redisClient = redis.createClient()
 
     messageSent = null
     lastMessage = null
@@ -17,6 +21,9 @@ module.exports = (server) ->
     # When we see a message on chat_channel, send it to the browser
     redisClient.on "message", (channel, message) ->
       conn.write message
+
+    #conn.on "close", ->
+      #redisClient.end()
 
     conn.on "data", (data) ->
       data = JSON.parse data
@@ -44,27 +51,23 @@ module.exports = (server) ->
       publisher.publish room, JSON.stringify data
 
   clients.on "connection", (conn) ->
-    redisClient = redis.createClient()
-    clientCount = redis.createClient()
-    redisClient.subscribe "count"
-
-    clientCount.get "clientCount", (err, reply) ->
+    clientCountClient.get "clientCount", (err, reply) ->
       reply = 0 if reply is null
-      clientCount.set "clientCount", Number(reply) + 1
+      clientCountClient.set "clientCount", Number(reply) + 1
 
-    redisClient.on "message", (channel, message) ->
+    clientCount.on "message", (channel, message) ->
       conn.write message
 
     broadcastCount = () ->
-      clientCount.get "clientCount", (err, reply) ->
+      clientCountClient.get "clientCount", (err, reply) ->
         reply = 0 if reply is null
         publisher.publish "count", reply
 
     broadcastCount()
     conn.on "close", ->
-      clientCount.get "clientCount", (err, reply) ->
+      clientCountClient.get "clientCount", (err, reply) ->
         reply = 1 if reply is null
-        clientCount.set "clientCount", Number(reply) - 1
+        clientCountClient.set "clientCount", Number(reply) - 1
 
         broadcastCount()
 
