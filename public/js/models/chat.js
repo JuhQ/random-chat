@@ -8,54 +8,27 @@
         this.messageSent = null;
         this.lastMessage = null;
         this.connect(options.room);
-        /*
-        @connect()
-        */
-
         this.listenChat();
         return this.listenCount();
-        /*
-        @listenJoin()
-        @listenLeave()
-        @listenDisconnect()
-        */
-
-      },
-      initSocket: function() {
-        this.sock = new SockJS("" + this.host + "/send");
       },
       connect: function(room) {
         var that;
         that = this;
-        this.initSocket();
+        this.sock = new SockJS("" + this.host + "/send");
         this.sock.onopen = function() {
-          that.openSocket = true;
           return that.sock.send(JSON.stringify({
             u: "",
             m: "",
             r: room
           }));
         };
-        /*
-        @sock.onclose = ->
-          that.openSocket = false
-          
-          that.openInterval = setInterval ->
-            that.initSocket()
-            console.log "opening..."
-        
-            if that.openSocket
-              clearInterval that.openInterval
-          , 1000
-        
-          
-          console.log "close sock"
-        
-        @sock.onopen = ->
-          that.openSocket = true
-          console.log "open sock"
-        */
-
+      },
+      listenChat: function() {
+        var that;
+        that = this;
+        this.sock.onmessage = function(e) {
+          return that.showMessage(JSON.parse(e.data));
+        };
       },
       listenCount: function() {
         var count, sock;
@@ -65,7 +38,6 @@
           return count.text(JSON.parse(e.data));
         };
       },
-      setOptions: function(options) {},
       send: function(u, message, r) {
         var m, that;
         that = this;
@@ -160,13 +132,6 @@
           i++;
         }
         return hex;
-      },
-      listenChat: function() {
-        var that;
-        that = this;
-        this.sock.onmessage = function(e) {
-          return that.showMessage(JSON.parse(e.data));
-        };
       },
       linkify: function(str) {
         var re;

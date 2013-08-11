@@ -4,9 +4,7 @@ module.exports = (server) ->
 
   # Redis publisher
   publisher = redis.createClient()
-  
-  clientCountClient = redis.createClient()
-
+  userCountClient = redis.createClient()
   clientCount = redis.createClient()
   clientCount.subscribe "count"
     
@@ -51,23 +49,23 @@ module.exports = (server) ->
       publisher.publish room, JSON.stringify data
 
   clients.on "connection", (conn) ->
-    clientCountClient.get "clientCount", (err, reply) ->
-      reply = 0 if reply is null
-      clientCountClient.set "clientCount", Number(reply) + 1
+    userCountClient.get "clientCount", (err, reply) ->
+      reply = 0 if reply is null or null
+      userCountClient.set "clientCount", Number(reply) + 1
 
     clientCount.on "message", (channel, message) ->
       conn.write message
 
     broadcastCount = () ->
-      clientCountClient.get "clientCount", (err, reply) ->
-        reply = 0 if reply is null
+      userCountClient.get "clientCount", (err, reply) ->
+        reply = 0 if reply is null or err
         publisher.publish "count", reply
 
     broadcastCount()
     conn.on "close", ->
-      clientCountClient.get "clientCount", (err, reply) ->
-        reply = 1 if reply is null
-        clientCountClient.set "clientCount", Number(reply) - 1
+      userCountClient.get "clientCount", (err, reply) ->
+        reply = 1 if reply is null or null
+        userCountClient.set "clientCount", Number(reply) - 1
 
         broadcastCount()
 

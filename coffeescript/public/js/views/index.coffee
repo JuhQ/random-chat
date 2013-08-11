@@ -49,11 +49,9 @@ define [
     setOptions: (options) ->
       room = options.room || @mainRoom
       @model = new Model({room}) unless @model
-      #@model.setOptions {room}
       @setBoards(room)
 
     leaveRoom: () ->
-      #@model.leaveRoom($(".room").val())
       @$(".messages").html("")
 
     sendMessage: (event) ->

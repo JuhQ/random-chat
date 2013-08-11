@@ -1,10 +1,10 @@
 (function() {
   module.exports = function(server) {
-    var clientCount, clientCountClient, clients, publisher, redis, send, sockjs;
+    var clientCount, clients, publisher, redis, send, sockjs, userCountClient;
     sockjs = require("sockjs");
     redis = require("redis");
     publisher = redis.createClient();
-    clientCountClient = redis.createClient();
+    userCountClient = redis.createClient();
     clientCount = redis.createClient();
     clientCount.subscribe("count");
     send = sockjs.createServer();
@@ -49,18 +49,18 @@
     });
     clients.on("connection", function(conn) {
       var broadcastCount;
-      clientCountClient.get("clientCount", function(err, reply) {
-        if (reply === null) {
+      userCountClient.get("clientCount", function(err, reply) {
+        if (reply === null || null) {
           reply = 0;
         }
-        return clientCountClient.set("clientCount", Number(reply) + 1);
+        return userCountClient.set("clientCount", Number(reply) + 1);
       });
       clientCount.on("message", function(channel, message) {
         return conn.write(message);
       });
       broadcastCount = function() {
-        return clientCountClient.get("clientCount", function(err, reply) {
-          if (reply === null) {
+        return userCountClient.get("clientCount", function(err, reply) {
+          if (reply === null || err) {
             reply = 0;
           }
           return publisher.publish("count", reply);
@@ -68,11 +68,11 @@
       };
       broadcastCount();
       return conn.on("close", function() {
-        return clientCountClient.get("clientCount", function(err, reply) {
-          if (reply === null) {
+        return userCountClient.get("clientCount", function(err, reply) {
+          if (reply === null || null) {
             reply = 1;
           }
-          clientCountClient.set("clientCount", Number(reply) - 1);
+          userCountClient.set("clientCount", Number(reply) - 1);
           return broadcastCount();
         });
       });

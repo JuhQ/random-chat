@@ -9,7 +9,6 @@
       underscore: "libs/underscore",
       text: "libs/text",
       moment: "libs/moment",
-      socketio: "../../socket.io/socket.io.js",
       sockjs: "http://cdn.sockjs.org/sockjs-0.3"
     }
   });

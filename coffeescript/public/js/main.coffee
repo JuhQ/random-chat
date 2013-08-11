@@ -8,8 +8,6 @@ requirejs.config
     underscore: "libs/underscore"
     text: "libs/text"
     moment: "libs/moment"
-    socketio: "../../socket.io/socket.io.js"
-    #sockjs: "http://cdn.sockjs.org/sockjs-0.3.min"
     sockjs: "http://cdn.sockjs.org/sockjs-0.3"
 
 define [
@@ -22,8 +20,8 @@ define [
   $
   _
   Backbone
-    Router
-    Fastclick
+  Router
+  Fastclick
   ) ->
   router = new Router()
   Backbone.history.start

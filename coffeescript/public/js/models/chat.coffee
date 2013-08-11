@@ -1,13 +1,11 @@
 define [
   "underscore"
   "backbone"
-  #"socketio"
   "sockjs"
   "text!templates/message.html"
   ], (
   _
   Backbone
-  #io
   socks
   Template
   ) ->
@@ -19,74 +17,32 @@ define [
 
       @messageSent = null
       @lastMessage = null
-      
 
       @connect(options.room)
-
-      ###
-      @connect()
-      ###
-
       @listenChat()
       @listenCount()
 
-      ###
-      @listenJoin()
-      @listenLeave()
-      @listenDisconnect()
-      ###
-
-
-    initSocket: ->
-      @sock = new SockJS("#{@host}/send")
-      return
     connect: (room) ->
       that = @
-      @initSocket()
+      @sock = new SockJS("#{@host}/send")
       @sock.onopen = ->
-        that.openSocket = true
         that.sock.send JSON.stringify {u: "", m: "", r: room}
 
-      ###
-      @sock.onclose = ->
-        that.openSocket = false
-        
-        that.openInterval = setInterval ->
-          that.initSocket()
-          console.log "opening..."
+      return
 
-          if that.openSocket
-            clearInterval that.openInterval
-        , 1000
-
-        
-        console.log "close sock"
-
-      @sock.onopen = ->
-        that.openSocket = true
-        console.log "open sock"
-      ###
-
+    listenChat: ->
+      that = @
+      @sock.onmessage = (e) ->
+        that.showMessage(JSON.parse e.data)
       return
 
     listenCount: ->
       sock = new SockJS("#{@host}/clients")
-
       count = $(".count")
       sock.onmessage = (e) ->
         count.text (JSON.parse e.data)
 
-      #sock.onclose = ->
-      #  console.log "close"
-
       return
-
-    #connect: ->
-    #  @socket = io.connect("http://#{window.location.host}")
-    #  return
-
-    setOptions: (options) ->
-      #@joinRoom options.room
 
     send: (u, message, r) ->
       that = @
@@ -103,7 +59,6 @@ define [
       return @showSpam(m) if @lastMessage is m
 
       @sock.send JSON.stringify {u, m, r}
-      #@socket.emit "message", {u, m, r}
 
       @messageSent = true
       @lastMessage = m
@@ -184,39 +139,6 @@ define [
         i++
       hex
 
-    #listenDisconnect: ->
-    #  that = @
-    #  @socket.on "disconnect", (data) ->
-    #    that.connect()
-
-    listenChat: ->
-      that = @
-      @sock.onmessage = (e) ->
-        that.showMessage(JSON.parse e.data)
-
-      return
-      #@socket.on "message", (data) ->
-      #  that.showMessage(data)
-
-    #listenCount: ->
-    #  that = @
-    #  count = $(".count")
-    #  @socket.on "clients", (clients) ->
-    #    count.text clients
-
-    #listenJoin: ->
-    #  @socket.on "join", (room) ->
-    #    $(".room").val(room)
-
-    #listenLeave: ->
-    #  @socket.on "leave", (room) ->
-
-    #joinRoom: (r) ->
-    #  @socket.emit "join", {r}
-
-    #leaveRoom: (r) ->
-    #  @socket.emit "leave", {r}
-
     linkify: (str) ->
       re = [
             "#([a-z0-9_-]+)"
@@ -224,7 +146,7 @@ define [
           ]
       re = new RegExp(re.join("|"), "gi")
       str.replace re, (match, twitler, ylilauta) ->
-        return "<a href=\"/#" + twitler + "\">#" + twitler + "</a>" if twitler
-        return "<a href=\"http://ylilauta.org/scripts/redirect.php?id=" + ylilauta + "\">&gt;&gt;" + ylilauta + "</a>" if ylilauta
+        return "<a href=\"/##{twitler}\">##{twitler}</a>" if twitler
+        return "<a href=\"http://ylilauta.org/scripts/redirect.php?id=#{ylilauta}\">&gt;&gt;#{ylilauta}</a>" if ylilauta
 
         match
