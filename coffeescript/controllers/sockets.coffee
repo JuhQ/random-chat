@@ -1,36 +1,29 @@
 module.exports = (server) ->
   sockjs = require("sockjs")
+  redis = require("redis")
+
+  # Redis publisher
+  publisher = redis.createClient()
+
   send = sockjs.createServer()
   clients = sockjs.createServer()
 
-  broadcast = {}
-  rooms = {}
-  clientBroadcast = {}
-  clientsCount = 0
-
   send.on "connection", (conn) ->
-    broadcast[conn.id] = conn
+    redisClient = redis.createClient()
 
     messageSent = null
     lastMessage = null
 
-    conn.on "close", ->
-      delete broadcast[conn.id]
-
-      for id of rooms
-        if rooms[id][conn.id]
-          delete rooms[id][conn.id]
-        unless Object.keys(rooms[id])
-          delete rooms[id]
-
+    # When we see a message on chat_channel, send it to the browser
+    redisClient.on "message", (channel, message) ->
+      conn.write message
 
     conn.on "data", (data) ->
       data = JSON.parse data
 
       room = data.r or ""
 
-      rooms[room] = {} unless rooms[room]
-      rooms[room][conn.id] = conn
+      redisClient.subscribe room
 
       return unless data.m?.length
       return if messageSent
@@ -48,23 +41,32 @@ module.exports = (server) ->
         return
       , 3000
 
-      for id of rooms[room]
-        rooms[room][id].write JSON.stringify data
-        #broadcast[id].write JSON.stringify data
+      publisher.publish room, JSON.stringify data
 
   clients.on "connection", (conn) ->
-    clientBroadcast[conn.id] = conn
-    clientsCount++
-    broadcastCount = ->
-      for id of clientBroadcast
-        clientBroadcast[id].write clientsCount
+    redisClient = redis.createClient()
+    clientCount = redis.createClient()
+    redisClient.subscribe "count"
+
+    clientCount.get "clientCount", (err, reply) ->
+      reply = 0 if reply is null
+      clientCount.set "clientCount", Number(reply) + 1
+
+    redisClient.on "message", (channel, message) ->
+      conn.write message
+
+    broadcastCount = () ->
+      clientCount.get "clientCount", (err, reply) ->
+        reply = 0 if reply is null
+        publisher.publish "count", reply
 
     broadcastCount()
     conn.on "close", ->
-      delete clientBroadcast[conn.id]
-      clientsCount--
-      broadcastCount()
+      clientCount.get "clientCount", (err, reply) ->
+        reply = 1 if reply is null
+        clientCount.set "clientCount", Number(reply) - 1
 
+        broadcastCount()
 
 
   send.installHandlers server, prefix: "/send"

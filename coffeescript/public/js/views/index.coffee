@@ -4,14 +4,14 @@ define [
   "backbone"
   "models/chat"
   "collections/boards"
-  "views/youtube"
+  #"views/youtube"
   ], (
   $
   _
   Backbone
   Model
   BoardsCollection
-  YoutubeView
+  #YoutubeView
   ) ->
   Backbone.View.extend
     el: "body"
@@ -35,9 +35,9 @@ define [
       @window.on "resize", @resize
       @resize()
 
-      new YoutubeView()
+      #new YoutubeView()
 
-      $("input[name='message']").bind "paste", (e) -> e.preventDefault()
+      $("input").bind "paste", (e) -> e.preventDefault()
 
     resize: ->
       height = @window.height() - 60

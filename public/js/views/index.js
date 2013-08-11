@@ -1,5 +1,5 @@
 (function() {
-  define(["jquery", "underscore", "backbone", "models/chat", "collections/boards", "views/youtube"], function($, _, Backbone, Model, BoardsCollection, YoutubeView) {
+  define(["jquery", "underscore", "backbone", "models/chat", "collections/boards"], function($, _, Backbone, Model, BoardsCollection) {
     return Backbone.View.extend({
       el: "body",
       events: {
@@ -19,8 +19,7 @@
         this.window = $(window);
         this.window.on("resize", this.resize);
         this.resize();
-        new YoutubeView();
-        return $("input[name='message']").bind("paste", function(e) {
+        return $("input").bind("paste", function(e) {
           return e.preventDefault();
         });
       },

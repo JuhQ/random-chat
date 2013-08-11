@@ -28,9 +28,7 @@ app.get "/mad/test", routes.test
 
 server = http.createServer(app)
 sock = require("./controllers/sockets")(server)
-#socketio = require("./controllers/socketio")(server)
 
-###
 if cluster.isMaster
   
   # Fork workers.
@@ -42,10 +40,9 @@ if cluster.isMaster
   # Revive dead worker
   cluster.on "exit", (worker, code, signal) ->
     console.log "worker " + worker.process.pid + " died"
-    #cluster.fork()
+    cluster.fork()
 
 else
-###
 
-server.listen app.get("port"), ->
-  console.log "Express server listening on port " + app.get("port")
+  server.listen app.get("port"), ->
+    console.log "Express server listening on port " + app.get("port")

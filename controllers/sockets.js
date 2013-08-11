@@ -1,42 +1,24 @@
 (function() {
   module.exports = function(server) {
-    var broadcast, clientBroadcast, clients, clientsCount, rooms, send, sockjs;
+    var clients, publisher, redis, send, sockjs;
     sockjs = require("sockjs");
+    redis = require("redis");
+    publisher = redis.createClient();
     send = sockjs.createServer();
     clients = sockjs.createServer();
-    broadcast = {};
-    rooms = {};
-    clientBroadcast = {};
-    clientsCount = 0;
     send.on("connection", function(conn) {
-      var lastMessage, messageSent;
-      broadcast[conn.id] = conn;
+      var lastMessage, messageSent, redisClient;
+      redisClient = redis.createClient();
       messageSent = null;
       lastMessage = null;
-      conn.on("close", function() {
-        var id, _results;
-        delete broadcast[conn.id];
-        _results = [];
-        for (id in rooms) {
-          if (rooms[id][conn.id]) {
-            delete rooms[id][conn.id];
-          }
-          if (!Object.keys(rooms[id])) {
-            _results.push(delete rooms[id]);
-          } else {
-            _results.push(void 0);
-          }
-        }
-        return _results;
+      redisClient.on("message", function(channel, message) {
+        return conn.write(message);
       });
       return conn.on("data", function(data) {
-        var id, room, _ref, _results;
+        var room, _ref;
         data = JSON.parse(data);
         room = data.r || "";
-        if (!rooms[room]) {
-          rooms[room] = {};
-        }
-        rooms[room][conn.id] = conn;
+        redisClient.subscribe(room);
         if (!((_ref = data.m) != null ? _ref.length : void 0)) {
           return;
         }
@@ -56,30 +38,40 @@
         setTimeout(function() {
           messageSent = false;
         }, 3000);
-        _results = [];
-        for (id in rooms[room]) {
-          _results.push(rooms[room][id].write(JSON.stringify(data)));
-        }
-        return _results;
+        return publisher.publish(room, JSON.stringify(data));
       });
     });
     clients.on("connection", function(conn) {
-      var broadcastCount;
-      clientBroadcast[conn.id] = conn;
-      clientsCount++;
-      broadcastCount = function() {
-        var id, _results;
-        _results = [];
-        for (id in clientBroadcast) {
-          _results.push(clientBroadcast[id].write(clientsCount));
+      var broadcastCount, clientCount, redisClient;
+      redisClient = redis.createClient();
+      clientCount = redis.createClient();
+      redisClient.subscribe("count");
+      clientCount.get("clientCount", function(err, reply) {
+        if (reply === null) {
+          reply = 0;
         }
-        return _results;
+        return clientCount.set("clientCount", Number(reply) + 1);
+      });
+      redisClient.on("message", function(channel, message) {
+        return conn.write(message);
+      });
+      broadcastCount = function() {
+        return clientCount.get("clientCount", function(err, reply) {
+          if (reply === null) {
+            reply = 0;
+          }
+          return publisher.publish("count", reply);
+        });
       };
       broadcastCount();
       return conn.on("close", function() {
-        delete clientBroadcast[conn.id];
-        clientsCount--;
-        return broadcastCount();
+        return clientCount.get("clientCount", function(err, reply) {
+          if (reply === null) {
+            reply = 1;
+          }
+          clientCount.set("clientCount", Number(reply) - 1);
+          return broadcastCount();
+        });
       });
     });
     send.installHandlers(server, {
